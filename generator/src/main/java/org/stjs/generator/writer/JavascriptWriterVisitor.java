@@ -124,6 +124,7 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.ast.ASTNodeData;
 import org.stjs.generator.ast.SourcePosition;
+import org.stjs.generator.minify.MinifyLevel;
 import org.stjs.generator.name.DefaultNameProvider;
 import org.stjs.generator.name.NameProvider;
 import org.stjs.generator.scope.ClassScope;
@@ -159,11 +160,14 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	private List<Comment> comments;
 
 	private int currentComment = 0;
+	
+	private MinifyLevel minifyLevel;
 
-	public JavascriptWriterVisitor(boolean generateSourceMap) {
+	public JavascriptWriterVisitor(boolean generateSourceMap, MinifyLevel minifyLevel) {
+		this.minifyLevel = minifyLevel;
 		specialMethodHandlers = new SpecialMethodHandlers();
 		names = new DefaultNameProvider();
-		printer = new JavascriptWriter(generateSourceMap);
+		printer = new JavascriptWriter(generateSourceMap, minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS));
 	}
 
 	public String getGeneratedSource() {
@@ -268,15 +272,15 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		Scope scope = scope(n);
 		printer.print(names.getTypeName(scope.resolveType(n.getName()).getType()));
 		// TODO implements not considered
-		printer.print(" = ");
-		printer.printLn(" stjs.enumeration(");
+		printer.print(padBoth("="));
+		printer.printLn(padLeft("stjs.enumeration("));
 		printer.indent();
 		if (n.getEntries() != null) {
 			for (Iterator<EnumConstantDeclaration> i = n.getEntries().iterator(); i.hasNext();) {
 				EnumConstantDeclaration e = i.next();
 				printer.printStringLiteral(e.getName());
 				if (i.hasNext()) {
-					printer.printLn(", ");
+					printer.printLn(padRight(","));
 				}
 			}
 		}
@@ -289,11 +293,12 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(ForeachStmt n, GenerationContext context) {
 		printer.setSourceNode(n);
-		printer.print("for (");
+		printer.print(padRight("for"));
+		printer.print("(");
 		n.getVariable().accept(this, context);
 		printer.print(" in ");
 		n.getIterable().accept(this, context);
-		printer.print(") ");
+		printer.print(padRight(")"));
 
 		printer.addSouceMapping(context);
 
@@ -317,13 +322,14 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(IfStmt n, GenerationContext context) {
 		printer.setSourceNode(n);
-		printer.print("if (");
+		printer.print(padRight("if"));
+		printer.print("(");
 		n.getCondition().accept(this, context);
-		printer.print(") ");
+		printer.print(padRight(")"));
 		printer.addSouceMapping(context);
 		n.getThenStmt().accept(this, context);
 		if (n.getElseStmt() != null) {
-			printer.print(" else ");
+			printer.print(padLeft(padRightIfNotBlock("else", n.getElseStmt())));
 			n.getElseStmt().accept(this, context);
 		}
 	}
@@ -331,9 +337,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(WhileStmt n, GenerationContext context) {
 		printer.setSourceNode(n);
-		printer.print("while (");
+		printer.print(padRight("while"));
+		printer.print("(");
 		n.getCondition().accept(this, context);
-		printer.print(") ");
+		printer.print(padRight(")"));
 		printer.addSouceMapping(context);
 		n.getBody().accept(this, context);
 	}
@@ -353,10 +360,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(DoStmt n, GenerationContext context) {
 		printer.setSourceNode(n);
-		printer.print("do ");
+		printer.print(padRightIfNotBlock("do", n.getBody()));
 		printer.addSouceMapping(context);
 		n.getBody().accept(this, context);
-		printer.print(" while (");
+		printer.print(padBoth("while"));
+		printer.print("(");
 		n.getCondition().accept(this, context);
 		printer.print(");");
 	}
@@ -364,31 +372,32 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(ForStmt n, GenerationContext context) {
 		printer.setSourceNode(n);
-		printer.print("for (");
+		printer.print(padRight("for"));
+		printer.print("(");
 		if (n.getInit() != null) {
 			for (Iterator<Expression> i = n.getInit().iterator(); i.hasNext();) {
 				Expression e = i.next();
 				e.accept(this, context);
 				if (i.hasNext()) {
-					printer.print(", ");
+					printer.print(padRight(","));
 				}
 			}
 		}
-		printer.print("; ");
+		printer.print(padRight(";"));
 		if (n.getCompare() != null) {
 			n.getCompare().accept(this, context);
 		}
-		printer.print("; ");
+		printer.print(padRight(";"));
 		if (n.getUpdate() != null) {
 			for (Iterator<Expression> i = n.getUpdate().iterator(); i.hasNext();) {
 				Expression e = i.next();
 				e.accept(this, context);
 				if (i.hasNext()) {
-					printer.print(", ");
+					printer.print(padRight(","));
 				}
 			}
 		}
-		printer.print(") ");
+		printer.print(padRight(")"));
 		printer.addSouceMapping(context);
 		n.getBody().accept(this, context);
 	}
@@ -410,10 +419,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	private void printVariableDeclarator(VariableDeclarator n, GenerationContext context, boolean forceInitNull) {
 		n.getId().accept(this, context);
 		if (n.getInit() != null) {
-			printer.print(" = ");
+			printer.print(padBoth("="));
 			n.getInit().accept(this, context);
 		} else if (forceInitNull) {
-			printer.print(" = null");
+			printer.print(padBoth("="));
+			printer.print("null");
 		}
 
 	}
@@ -427,7 +437,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			VariableDeclarator v = i.next();
 			printVariableDeclarator(v, context, false);
 			if (i.hasNext()) {
-				printer.print(", ");
+				printer.print(padRight(","));
 			}
 		}
 	}
@@ -461,7 +471,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private void printComments(Node n, GenerationContext context) {
-		if (comments == null) {
+		if (comments == null || minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS)) {
 			return;
 		}
 		// the problem is that the comments are all attached to the root node
@@ -499,7 +509,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(".");
 			}
 			printer.print(name);
-			printer.print(" = function");
+			printer.print(padBoth("="));
+			printer.print("function");
 		}
 
 		printer.print("(");
@@ -511,7 +522,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 					continue;
 				}
 				if (!first) {
-					printer.print(", ");
+					printer.print(padRight(","));
 				}
 				p.accept(this, context);
 				first = false;
@@ -522,7 +533,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (body == null) {
 			printer.print("{}");
 		} else {
-			printer.print(" ");
+			printer.print(padRight(""));
 			body.accept(this, context);
 		}
 		if (!anonymous) {
@@ -557,7 +568,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		boolean first = true;
 		for (String param : beforeParams) {
 			if (!first) {
-				printer.print(", ");
+				printer.print(padRight(","));
 			}
 			printer.print(param);
 			first = false;
@@ -565,7 +576,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (expressions != null) {
 			for (Expression e : expressions) {
 				if (!first) {
-					printer.print(", ");
+					printer.print(padRight(","));
 				}
 				e.accept(this, context);
 				first = false;
@@ -573,7 +584,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 		for (String param : afterParams) {
 			if (!first) {
-				printer.print(", ");
+				printer.print(padRight(","));
 			}
 			printer.print(param);
 			first = false;
@@ -726,20 +737,23 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(LineComment n, GenerationContext context) {
-		printer.print("//");
-		if (n.getContent().endsWith("\n")) {
-			// remove trailing enter and printLn
-			// to keep indentation
-			printer.printLn(n.getContent().substring(0, n.getContent().length() - 1));
+		if(minifyLevel.isLessAggressiveOrEquals(MinifyLevel.NONE)){
+			printer.print("//");
+			if (n.getContent().endsWith("\n")) {
+				// remove trailing enter and printLn
+				// to keep indentation
+				printer.printLn(n.getContent().substring(0, n.getContent().length() - 1));
+			}
 		}
-
 	}
 
 	@Override
 	public void visit(BlockComment n, GenerationContext context) {
-		printer.print("/*");
-		printer.print(n.getContent());
-		printer.printLn("*/");
+		if(minifyLevel.isLessAggressiveOrEquals(MinifyLevel.NONE)){
+			printer.print("/*");
+			printer.print(n.getContent());
+			printer.printLn("*/");
+		}
 	}
 
 	private List<TypeWrapper> getImplementsOrExtends(ClassOrInterfaceDeclaration n) {
@@ -798,7 +812,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 		printer.print(className);
 
-		printer.print(" = ");
+		printer.print(padBoth("="));
 		if (n.getMembers() != null) {
 			ConstructorDeclaration constr = getConstructor(n.getMembers(), context);
 			if (constr != null) {
@@ -819,7 +833,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(className);
 
 				for (TypeWrapper ext : implementsOrExtends) {
-					printer.print(", " + names.getTypeName(ext));
+					printer.print(padRight(",") + names.getTypeName(ext));
 				}
 
 				printer.printLn(");");
@@ -861,7 +875,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			StringBuilder s = new StringBuilder();
 			s.append("{name:\"").append(pt.getExternalName()).append("\"");
 
-			s.append(", arguments:[");
+			s.append(",arguments:[");
 			boolean first = true;
 			for (TypeWrapper arg : pt.getActualTypeArguments()) {
 				if (!first) {
@@ -878,7 +892,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (typeWrapper instanceof ClassWrapper && ((ClassWrapper) typeWrapper).getClazz().isEnum()) {
 			StringBuilder s = new StringBuilder();
 			s.append("{name:\"Enum\"");
-			s.append(", arguments:[");
+			s.append(",arguments:[");
 			s.append("\"" + names.getTypeName(typeWrapper) + "\"");
 			s.append("]");
 			s.append("}");
@@ -914,7 +928,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				generateSuperClass = true;
 				printer.print("stjs.copyProps(");
 				printer.print(names.getTypeName(superClass));
-				printer.print(".").print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY).print(", ");
+				printer.print(".").print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY).print(padRight(","));
 			}
 		}
 
@@ -931,7 +945,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 					}
 					for (VariableDeclarator v : field.getVariables()) {
 						if (!first) {
-							printer.print(", ");
+							printer.print(padRight(","));
 						}
 						printer.print("\"").print(v.getId().getName()).print("\":");
 						printer.print(stjsNameInfo(fieldType));
@@ -1038,9 +1052,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(JavadocComment n, GenerationContext context) {
-		printer.print("/**");
-		printer.print(n.getContent());
-		printer.printLn("*/");
+		if(minifyLevel.isLessAggressiveOrEquals(MinifyLevel.NONE)){
+			printer.print("/**");
+			printer.print(n.getContent());
+			printer.printLn("*/");
+		}
 	}
 
 	@Override
@@ -1081,7 +1097,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				Expression expr = i.next();
 				expr.accept(this, context);
 				if (i.hasNext()) {
-					printer.print(", ");
+					printer.print(padRight(","));
 				}
 			}
 
@@ -1128,7 +1144,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			} else {
 				n.getTarget().accept(this, context);
 			}
-			printer.print(" ");
+			printer.print(padRight(""));
 			switch (n.getOperator()) {
 			case assign:
 				printer.print(":");
@@ -1137,13 +1153,13 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 						"Cannot have this assign operator inside an inline object creation block");
 			}
-			printer.print(" ");
+			printer.print(padRight(""));
 			n.getValue().accept(this, context);
 			return;
 		}
 
 		n.getTarget().accept(this, context);
-		printer.print(" ");
+		printer.print(padRight(""));
 		switch (n.getOperator()) {
 		case assign:
 			printer.print("=");
@@ -1182,7 +1198,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print(">>>=");
 			break;
 		}
-		printer.print(" ");
+		printer.print(padRight(""));
 		n.getValue().accept(this, context);
 
 	}
@@ -1190,7 +1206,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(BinaryExpr n, GenerationContext context) {
 		n.getLeft().accept(this, context);
-		printer.print(" ");
+		printer.print(padRight(""));
 		switch (n.getOperator()) {
 		case or:
 			printer.print("||");
@@ -1250,7 +1266,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print("%");
 			break;
 		}
-		printer.print(" ");
+		printer.print(padRight(""));
 		n.getRight().accept(this, context);
 	}
 
@@ -1264,9 +1280,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(ConditionalExpr n, GenerationContext context) {
 		n.getCondition().accept(this, context);
-		printer.print(" ? ");
+		printer.print(padBoth("?"));
 		n.getThenExpr().accept(this, context);
-		printer.print(" : ");
+		printer.print(padBoth(":"));
 		n.getElseExpr().accept(this, context);
 	}
 
@@ -1280,7 +1296,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(InstanceOfExpr n, GenerationContext context) {
 		n.getExpr().accept(this, context);
-		printer.print(".constructor ==  ");
+		printer.print(".constructor");
+		printer.print(padBoth("=="));
 		if (n.getType() instanceof ReferenceType) {
 			// TODO : could be more generic
 			TypeWrapper type = scope(n).resolveType(((ReferenceType) n.getType()).getType().toString()).getType();
@@ -1435,10 +1452,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print("!");
 			break;
 		case preIncrement:
-			printer.print("++");
+			printer.print(" ++");
 			break;
 		case preDecrement:
-			printer.print("--");
+			printer.print(" --");
 			break;
 		}
 
@@ -1446,10 +1463,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 		switch (n.getOperator()) {
 		case posIncrement:
-			printer.print("++");
+			printer.print("++ ");
 			break;
 		case posDecrement:
-			printer.print("--");
+			printer.print("-- ");
 			break;
 		}
 	}
@@ -1514,7 +1531,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (!iterated.isAssignableFrom(TypeWrappers.wrap(Array.class))) {
 			return;
 		}
-		printer.print("if (!(");
+		printer.print("if(!(");
 		n.getIterable().accept(this, context);
 		printer.print(").hasOwnProperty(");
 		printer.print(n.getVariable().getVars().get(0).getId().getName());
@@ -1550,7 +1567,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(LabeledStmt n, GenerationContext context) {
 		printer.print(n.getLabel());
-		printer.print(": ");
+		printer.print(padRight(":"));
 		n.getStmt().accept(this, context);
 	}
 
@@ -1648,7 +1665,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(TryStmt n, GenerationContext context) {
-		printer.print("try ");
+		printer.print(padRight("try"));
 		n.getTryBlock().accept(this, context);
 		if (n.getCatchs() != null) {
 			for (CatchClause c : n.getCatchs()) {
@@ -1656,16 +1673,17 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			}
 		}
 		if (n.getFinallyBlock() != null) {
-			printer.print(" finally ");
+			printer.print(padBoth("finally"));
 			n.getFinallyBlock().accept(this, context);
 		}
 	}
 
 	@Override
 	public void visit(CatchClause n, GenerationContext context) {
-		printer.print(" catch (");
+		printer.print(padBoth("catch"));
+		printer.print("(");
 		n.getExcept().accept(this, context);
-		printer.print(") ");
+		printer.print(padRight(")"));
 		n.getCatchBlock().accept(this, context);
 	}
 
@@ -1673,5 +1691,32 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.writeSourceMap(context, sourceMapWriter);
 
 	}
-
+	
+	private String padLeft(String str){
+		if(minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS)){
+			return str;
+		}
+		return " " + str;
+	}
+	
+	private String padRight(String str){
+		if(minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS)){
+			return str;
+		}
+		return str + " ";
+	}
+	
+	private String padBoth(String str){
+		if(minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS)){
+			return str;
+		}
+		return " " + str + " ";
+	}
+	
+	private String padRightIfNotBlock(String str, Statement n){
+		if(minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS) && n instanceof BlockStmt){
+			return str;
+		}
+		return str + " ";
+	}
 }

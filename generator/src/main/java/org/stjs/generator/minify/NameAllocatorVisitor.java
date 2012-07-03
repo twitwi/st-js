@@ -28,7 +28,7 @@ public class NameAllocatorVisitor extends ForEachNodeVisitor<Void> {
 
 	@Override
 	public void visit(Parameter n, Void arg) {
-		if(level.isMoreAgressiveThan(PARAMETERS_AND_LOCALS)){
+		if(level.isMoreAggressiveOrEquals(PARAMETERS_AND_LOCALS)){
 			Variable var = ASTNodeData.resolvedVariable(n);
 			var.setMinifiedName(allocator.nextName());
 		}
@@ -36,7 +36,7 @@ public class NameAllocatorVisitor extends ForEachNodeVisitor<Void> {
 
 	@Override
 	public void visit(VariableDeclarator n, Void arg) {
-		if(level.isMoreAgressiveThan(PARAMETERS_AND_LOCALS)){
+		if(level.isMoreAggressiveOrEquals(PARAMETERS_AND_LOCALS)){
 			Variable var = ASTNodeData.resolvedVariable(n);
 			var.setMinifiedName(allocator.nextName());
 		}

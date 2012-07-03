@@ -4,16 +4,16 @@ public enum MinifyLevel {
 	/**
 	 * No minification of the generated javascript is performed. This is the most useful
 	 * option if you plan to use the generated javascript in a development environment
-	 * or for debugging purposes.
+	 * or for debugging purposes. (Size of examples with this option: 5632 Bytes)
 	 */
 	NONE ("none", 0),
 	
 	/**
-	 * Most naive option, all non-necessary whitespace will be removed from the generated
+	 * Most naive option. All comments non-necessary whitespace will be removed from the generated
 	 * javascript code. All code depending on the generated javascript will still work
-	 * as expected.
+	 * as expected. (Size of examples with this option: 3995 Bytes, 71% of original size)
 	 */
-	WHITESPACE ("whitespace", 1),
+	WHITESPACE_AND_COMMENTS ("whitespace", 1),
 
 	/**
 	 * Same as WHITESPACE, but will also shorten the names of function parameters 
@@ -52,11 +52,11 @@ public enum MinifyLevel {
 		return this.configOptionName;
 	}
 	
-	public boolean isLessAggressiveThan(MinifyLevel reference){
+	public boolean isLessAggressiveOrEquals(MinifyLevel reference){
 		return this.level <= reference.level;
 	}
 	
-	public boolean isMoreAgressiveThan(MinifyLevel reference){
+	public boolean isMoreAggressiveOrEquals(MinifyLevel reference){
 		return this.level >= reference.level;
 	}
 }

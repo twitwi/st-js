@@ -9,6 +9,7 @@ import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
+import org.stjs.generator.minify.MinifyLevel;
 
 /**
  * 
@@ -25,7 +26,7 @@ public class MinifySTJSMojo extends MainSTJSMojo {
 	@Override
 	protected GeneratorConfigurationBuilder getGeneratorConfiguration()
 			throws MojoExecutionException {
-		return super.getGeneratorConfiguration().minified(true).generateSourceMap(false);
+		return super.getGeneratorConfiguration().minifyLevel(MinifyLevel.PARAMETERS_AND_LOCALS).generateSourceMap(false);
 	}
 
 	@Override

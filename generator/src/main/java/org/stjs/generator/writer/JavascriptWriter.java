@@ -45,26 +45,35 @@ public class JavascriptWriter {
 
 	private FilePosition sourcePosition;
 	private FilePosition startOutputPosition;
+	
+	private boolean suppressWhitespace = false;
 
-	public JavascriptWriter(boolean generateSourceMap) {
+	public JavascriptWriter(boolean generateSourceMap, boolean suppressWhitespace) {
 		sourceMapGenerator = generateSourceMap ? SourceMapGeneratorFactory.getInstance(SourceMapFormat.V3) : null;
 		this.generateSourceMap = generateSourceMap;
+		this.suppressWhitespace = suppressWhitespace;
 	}
 
 	public JavascriptWriter indent() {
-		level++;
+		if(!suppressWhitespace){
+			level++;
+		}
 		return this;
 	}
 
 	public JavascriptWriter unindent() {
-		level--;
+		if(!suppressWhitespace){
+			level--;
+		}
 		return this;
 	}
 
 	private void makeIndent() {
-		for (int i = 0; i < level; i++) {
-			buf.append(INDENT);
-			currentColumn += INDENT.length();
+		if(!suppressWhitespace){
+			for (int i = 0; i < level; i++) {
+				buf.append(INDENT);
+				currentColumn += INDENT.length();
+			}
 		}
 	}
 
@@ -113,10 +122,12 @@ public class JavascriptWriter {
 	}
 
 	public JavascriptWriter printLn() {
-		buf.append("\n");
-		indented = false;
-		currentLine++;
-		currentColumn = 0;
+		if(!suppressWhitespace){
+			buf.append("\n");
+			indented = false;
+			currentLine++;
+			currentColumn = 0;
+		}
 		return this;
 	}
 

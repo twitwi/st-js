@@ -102,7 +102,7 @@ public class Generator {
 
 		CompilationUnit cu = parseAndResolve(classLoaderWrapper, inputFile, context);
 
-		if(configuration.getMinifyLevel().isMoreAgressiveThan(MinifyLevel.PARAMETERS_AND_LOCALS)){
+		if(configuration.getMinifyLevel().isMoreAggressiveOrEquals(MinifyLevel.PARAMETERS_AND_LOCALS)){
 			minify(classLoaderWrapper, cu, configuration.getMinifyLevel(), context);
 		}
 		
@@ -111,7 +111,9 @@ public class Generator {
 
 		try {
 			// generate the javascript code
-			JavascriptWriterVisitor generatorVisitor = new JavascriptWriterVisitor(configuration.isGenerateSourceMap());
+			JavascriptWriterVisitor generatorVisitor = new JavascriptWriterVisitor(
+					configuration.isGenerateSourceMap(),
+					configuration.getMinifyLevel());
 			generatorVisitor.visit(cu, context);
 
 			writer = new FileWriter(outputFile);
