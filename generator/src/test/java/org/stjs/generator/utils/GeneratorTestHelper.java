@@ -21,6 +21,7 @@ import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
+import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.executor.ExecutionResult;
 import org.stjs.generator.executor.RhinoExecutor;
@@ -40,16 +41,20 @@ public class GeneratorTestHelper {
 	 * @return the javascript code generator from the given class
 	 */
 	public static String generate(Class<?> clazz) {
-		return (String) executeOrGenerate(clazz, false);
+		return (String) executeOrGenerate(clazz, new GeneratorConfigurationBuilder(), false);
 	}
 
+	public static String generateMinified(Class<?> clazz){
+		return (String) executeOrGenerate(clazz, new GeneratorConfigurationBuilder().minified(true).generateSourceMap(false), false);
+	}
+	
 	/**
 	 * 
 	 * @param clazz
 	 * @return the javascript code generator from the given class
 	 */
 	public static Object execute(Class<?> clazz) {
-		return convert(executeOrGenerate(clazz, true));
+		return convert(executeOrGenerate(clazz, new GeneratorConfigurationBuilder(), true));
 	}
 
 	private static Object convert(Object result) {
@@ -105,14 +110,20 @@ public class GeneratorTestHelper {
 		}
 		return js;
 	}
+	
+
+	private static Object executeOrGenerate(Class<?> clazz, GeneratorConfigurationBuilder conf, boolean execute) {
+		return executeOrGenerate(clazz, conf.allowedPackage("org.stjs.javascript")
+				.allowedPackage("org.stjs.generator").build(), execute);	
+	}
 
 	/**
 	 * 
 	 * @param clazz
 	 * @return the javascript code generator from the given class
 	 */
-	private static Object executeOrGenerate(Class<?> clazz, boolean execute) {
-		Generator gen = new Generator();
+	private static Object executeOrGenerate(Class<?> clazz, GeneratorConfiguration config, boolean execute) {
+				Generator gen = new Generator();
 
 		File generationPath = new File("target", TEMP_GENERATION_PATH);
 		GenerationDirectory generationFolder = new GenerationDirectory(generationPath, new File(TEMP_GENERATION_PATH),
@@ -124,8 +135,7 @@ public class GeneratorTestHelper {
 				new File(sourcePath),
 				generationFolder,
 				new File("target", "test-classes"),
-				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript")
-						.allowedPackage("org.stjs.generator").build());
+				config);
 
 		File jsFile = new File(generationPath, stjsClass.getJavascriptFiles().get(0).getPath());
 		try {
