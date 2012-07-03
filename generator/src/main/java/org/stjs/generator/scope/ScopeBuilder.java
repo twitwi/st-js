@@ -731,9 +731,23 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	}
 
 	@Override
-	public void visit(FieldDeclaration n, Scope arg) {
+	public void visit(FieldDeclaration n, Scope scope) {
 		Checks.checkFieldDeclaration(n, context);
-		super.visit(n, arg);
+		
+		// we now need to properly set ASTNodeData.resolvedVariable
+		for(VariableDeclarator decl : n.getVariables()){
+			// we are already allowed to call resolveVariable in the declaration
+			// of the field, because its enclosing TypeWrapper and ClassScope has 
+			// already been populated
+			VariableWithScope field = scope.resolveVariable(decl.getId().getName());
+			resolvedType(decl, field.getVariable().getType());
+			resolvedType(decl.getId(), field.getVariable().getType());
+			resolvedVariable(decl, field.getVariable());
+			resolvedVariable(decl.getId(), field.getVariable());
+			resolvedVariableScope(decl, field.getScope());
+			resolvedVariableScope(decl.getId(), field.getScope());
+		}
+		super.visit(n, scope);
 	}
 
 	@Override
