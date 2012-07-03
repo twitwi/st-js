@@ -15,7 +15,7 @@
  */
 package org.stjs.generator.type;
 
-import org.stjs.generator.variable.Variable;
+import org.stjs.generator.variable.AbstractVariable;
 
 /**
  * This class wrapps a class field to use the type wrappers.
@@ -23,27 +23,17 @@ import org.stjs.generator.variable.Variable;
  * @author acraciun
  * 
  */
-public class FieldWrapper implements Variable {
-	private final String name;
-	private final TypeWrapper type;
+public class FieldWrapper extends AbstractVariable {
+	
 	private final TypeWrapper ownerType;
 	private final int modifiers;
 	private final boolean declared;
 
 	public FieldWrapper(String name, TypeWrapper type, int modifiers, TypeWrapper ownerType, boolean declared) {
-		this.name = name;
-		this.type = type;
+		super(type, name);
 		this.ownerType = ownerType;
 		this.modifiers = modifiers;
 		this.declared = declared;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public TypeWrapper getType() {
-		return type;
 	}
 
 	public TypeWrapper getOwnerType() {

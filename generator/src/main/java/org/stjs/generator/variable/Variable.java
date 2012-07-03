@@ -20,6 +20,10 @@ import org.stjs.generator.type.TypeWrapper;
 public interface Variable {
 
 	String getName();
+	
+	String getMinifiedName();
+	
+	void setMinifiedName(String minified);
 
 	TypeWrapper getType();
 
