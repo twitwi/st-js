@@ -30,6 +30,7 @@ import java.net.URISyntaxException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.stjs.generator.minify.NameAllocatorVisitor;
 import org.stjs.generator.scope.CompilationUnitScope;
 import org.stjs.generator.scope.ScopeBuilder;
 import org.stjs.generator.type.ClassLoaderWrapper;
@@ -100,6 +101,10 @@ public class Generator {
 
 		CompilationUnit cu = parseAndResolve(classLoaderWrapper, inputFile, context);
 
+		if(configuration.isMinified()){
+			minify(classLoaderWrapper, cu, context);
+		}
+		
 		FileWriter writer = null;
 		FileWriter sourceMapWriter = null;
 
@@ -137,6 +142,14 @@ public class Generator {
 		stjsClass.setGeneratedJavascriptFile(relative(generationFolder, className));
 		stjsClass.store();
 		return stjsClass;
+	}
+
+	private void minify(ClassLoaderWrapper classLoaderWrapper,
+			CompilationUnit cu, GenerationContext context) {
+		
+		NameAllocatorVisitor visitor = new NameAllocatorVisitor();
+		visitor.visit(cu, null);
+		
 	}
 
 	private URI relative(GenerationDirectory generationFolder, String className) {

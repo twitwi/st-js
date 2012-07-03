@@ -30,6 +30,7 @@ public class GeneratorConfigurationBuilder {
 	private Set<String> allowedJavaLangClasses = new HashSet<String>();
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap = false;
+	private boolean minified = false;
 
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {
 		allowedPackages.add(packageName);
@@ -60,6 +61,11 @@ public class GeneratorConfigurationBuilder {
 		generateSourceMap = b;
 		return this;
 	}
+	
+	public GeneratorConfigurationBuilder minified(boolean b){
+		minified = b;
+		return this;
+	}
 
 	public GeneratorConfiguration build() {
 		allowedJavaLangClasses.add("Object");
@@ -81,7 +87,7 @@ public class GeneratorConfigurationBuilder {
 		allowedPackages.add("java.lang");
 
 		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateArrayHasOwnProperty,
-				generateSourceMap);
+				generateSourceMap, minified);
 	}
 
 }

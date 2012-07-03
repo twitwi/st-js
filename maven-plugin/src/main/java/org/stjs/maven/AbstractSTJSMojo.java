@@ -38,6 +38,7 @@ import org.codehaus.plexus.util.DirectoryScanner;
 import org.sonatype.plexus.build.incremental.BuildContext;
 import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
+import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.type.TypeWrappers;
@@ -127,21 +128,11 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			}
 			return new URLClassLoader(runtimeUrls, Thread.currentThread().getContextClassLoader());
 		} catch (Exception ex) {
-			throw new MojoExecutionException("Cannot get builtProjectClassLoader");
+			throw new MojoExecutionException("Cannot get builtProjectClassLoader", ex);
 		}
 	}
 
-	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
-		getLog().info("Generating javascript files");
-
-		GenerationDirectory gendir = getGeneratedSourcesDirectory();
-		// clear cache before each execution
-		TypeWrappers.clearCache();
-
-		ClassLoader builtProjectClassLoader = getBuiltProjectClassLoader();
-		Generator generator = new Generator();
-
+	protected GeneratorConfigurationBuilder getGeneratorConfiguration() throws MojoExecutionException {
 		GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
 		configBuilder.generateArrayHasOwnProperty(generateArrayHasOwnProperty);
 		configBuilder.generateSourceMap(generateSourceMap);
@@ -160,6 +151,22 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			configBuilder.allowedPackages(packages);
 		}
 
+		return configBuilder;
+	}
+	
+	@Override
+	public void execute() throws MojoExecutionException, MojoFailureException {
+		getLog().info("Generating javascript files");
+
+		GenerationDirectory gendir = getGeneratedSourcesDirectory();
+		// clear cache before each execution
+		TypeWrappers.clearCache();
+
+		ClassLoader builtProjectClassLoader = getBuiltProjectClassLoader();
+		Generator generator = new Generator();
+		GeneratorConfigurationBuilder configBuilder = getGeneratorConfiguration();
+
+		
 		boolean atLeastOneFileGenerated = false;
 		boolean hasFailures = false;
 		// scan the modified sources
@@ -171,21 +178,13 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 			sources = accumulateSources(gendir, sourceDir, mapping, stjsMapping);
 			for (File source : sources) {
-				File absoluteSource = new File(sourceDir, source.getPath());
 				try {
 					File absoluteTarget = (File) mapping.getTargetFiles(gendir.getAbsolutePath(), source.getPath())
 							.iterator().next();
-					getLog().info("Generating " + absoluteTarget);
-					buildContext.removeMessages(absoluteSource);
-
-					if (!absoluteTarget.getParentFile().exists() && !absoluteTarget.getParentFile().mkdirs()) {
-						getLog().error("Cannot create output directory:" + absoluteTarget.getParentFile());
-						continue;
-					}
-					String className = getClassNameForSource(source.getPath());
-					generator.generateJavascript(builtProjectClassLoader, className, sourceDir, gendir,
-							getBuildOutputDirectory(), configBuilder.build());
-					atLeastOneFileGenerated = true;
+					
+					atLeastOneFileGenerated |= this.processFile(source, sourceDir, absoluteTarget, gendir, 
+							generator, configBuilder.build(), builtProjectClassLoader);
+			
 
 				} catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
@@ -196,7 +195,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 					// continue with the next file
 				} catch (Exception e) {
 					// TODO - maybe should filter more here
-					buildContext.addMessage(absoluteSource, 1, 1, e.toString(), BuildContext.SEVERITY_ERROR, e);
+					buildContext.addMessage(new File(sourceDir, source.getPath()), 1, 1, e.toString(), BuildContext.SEVERITY_ERROR, e);
 					hasFailures = true;
 					// throw new MojoExecutionException("Error generating javascript:" + e, e);
 				}
@@ -210,6 +209,35 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		if (hasFailures) {
 			throw new MojoFailureException("Errors generating javascript");
 		}
+	}
+	
+	/**
+	 * Processes one source file and attempts to generate the corresponding javascript (and/or potentially other) files. 
+	 * This method returns true if it has successfully generated at least one file.
+	 * @param source The java source file that is being generated
+	 * @param sourceDir The directory in which the java source tree is rooted
+	 * @param absoluteTarget The javascript file that is supposed to be generated
+	 * @param gendir The directory in which all generated files will be placed
+	 * @param generator The generator that generates the JS files
+	 * @param config The configuration to supply to the generator
+	 * @param builtProjectClassLoader The classloader that can load the java Class corresponding to the specified source file
+	 * @return true if this method has generated at least one file, false if not.
+	 */
+	protected boolean processFile(File source, File sourceDir, File absoluteTarget, GenerationDirectory gendir, 
+			Generator generator, GeneratorConfiguration config, ClassLoader builtProjectClassLoader){
+		getLog().info("Generating " + absoluteTarget);
+
+		File absoluteSource = new File(sourceDir, source.getPath());
+		buildContext.removeMessages(absoluteSource);
+
+		if (!absoluteTarget.getParentFile().exists() && !absoluteTarget.getParentFile().mkdirs()) {
+			getLog().error("Cannot create output directory:" + absoluteTarget.getParentFile());
+			return false;
+		}
+		String className = getClassNameForSource(source.getPath());
+		generator.generateJavascript(builtProjectClassLoader, className, sourceDir, gendir,
+				getBuildOutputDirectory(), config);
+		return true;
 	}
 
 	protected void filesGenerated(Generator generator, GenerationDirectory gendir) throws MojoFailureException {
@@ -250,7 +278,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		return result;
 	}
 
-	private String getClassNameForSource(String sourcePath) {
+	protected String getClassNameForSource(String sourcePath) {
 		// remove ending .java and replace / by .
 		return sourcePath.substring(0, sourcePath.length() - 5).replace(File.separatorChar, '.');
 	}
