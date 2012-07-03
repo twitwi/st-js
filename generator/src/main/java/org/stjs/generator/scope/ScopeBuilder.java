@@ -267,7 +267,12 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 					resolvedParameterTypes.length);
 			for (int i = 0; i < parameters.size(); ++i) {
 				TypeWrapper clazz = resolvedParameterTypes[i];
-				scope.addVariable(new ParameterVariable(clazz, parameters.get(i).getId().getName()));
+				ParameterVariable var = new ParameterVariable(clazz, parameters.get(i).getId().getName());
+				scope.addVariable(var);
+				resolvedVariable(parameters.get(i), var);
+				resolvedVariable(parameters.get(i).getId(), var);
+				resolvedVariableScope(parameters.get(i), scope);
+				resolvedVariableScope(parameters.get(i).getId(), scope);
 			}
 		}
 
