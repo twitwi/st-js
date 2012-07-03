@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.stjs.generator.minify.MinifyLevel;
+
 /**
  * Use this class to build a configuration needed by the {@link Generator}
  * 
@@ -30,7 +32,7 @@ public class GeneratorConfigurationBuilder {
 	private Set<String> allowedJavaLangClasses = new HashSet<String>();
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap = false;
-	private boolean minified = false;
+	private MinifyLevel minifyLevel = MinifyLevel.NONE;
 
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {
 		allowedPackages.add(packageName);
@@ -62,8 +64,8 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 	
-	public GeneratorConfigurationBuilder minified(boolean b){
-		minified = b;
+	public GeneratorConfigurationBuilder minifyLevel(MinifyLevel l){
+		minifyLevel = l;
 		return this;
 	}
 
@@ -87,7 +89,7 @@ public class GeneratorConfigurationBuilder {
 		allowedPackages.add("java.lang");
 
 		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateArrayHasOwnProperty,
-				generateSourceMap, minified);
+				generateSourceMap, minifyLevel);
 	}
 
 }

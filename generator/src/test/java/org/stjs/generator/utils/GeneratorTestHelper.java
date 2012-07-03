@@ -25,6 +25,7 @@ import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.executor.ExecutionResult;
 import org.stjs.generator.executor.RhinoExecutor;
+import org.stjs.generator.minify.MinifyLevel;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
 import org.stjs.javascript.Map;
@@ -44,8 +45,8 @@ public class GeneratorTestHelper {
 		return (String) executeOrGenerate(clazz, new GeneratorConfigurationBuilder(), false);
 	}
 
-	public static String generateMinified(Class<?> clazz){
-		return (String) executeOrGenerate(clazz, new GeneratorConfigurationBuilder().minified(true).generateSourceMap(false), false);
+	public static String generateMinified(Class<?> clazz, MinifyLevel level){
+		return (String) executeOrGenerate(clazz, new GeneratorConfigurationBuilder().minifyLevel(level).generateSourceMap(false), false);
 	}
 	
 	/**

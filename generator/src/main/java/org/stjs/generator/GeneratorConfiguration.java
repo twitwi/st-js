@@ -18,20 +18,22 @@ package org.stjs.generator;
 import java.util.Collection;
 import java.util.Set;
 
+import org.stjs.generator.minify.MinifyLevel;
+
 public class GeneratorConfiguration {
 	private final Collection<String> allowedPackages;
 	private final Set<String> allowedJavaLangClasses;
 	private final boolean generateArrayHasOwnProperty;
 	private final boolean generateSourceMap;
-	private final boolean minified;
+	private final MinifyLevel minifyLevel;
 
 	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses,
-			boolean generateArrayHasOwnProperty, boolean generateSourceMap, boolean minified) {
+			boolean generateArrayHasOwnProperty, boolean generateSourceMap, MinifyLevel minifyLevel) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.generateArrayHasOwnProperty = generateArrayHasOwnProperty;
 		this.generateSourceMap = generateSourceMap;
-		this.minified = minified;
+		this.minifyLevel = minifyLevel;
 	}
 
 	/**
@@ -55,8 +57,8 @@ public class GeneratorConfiguration {
 		return generateSourceMap;
 	}
 	
-	public boolean isMinified(){
-		return minified;
+	public MinifyLevel getMinifyLevel(){
+		return minifyLevel;
 	}
 
 }

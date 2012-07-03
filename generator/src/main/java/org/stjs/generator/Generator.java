@@ -30,6 +30,7 @@ import java.net.URISyntaxException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.stjs.generator.minify.MinifyLevel;
 import org.stjs.generator.minify.NameAllocatorVisitor;
 import org.stjs.generator.scope.CompilationUnitScope;
 import org.stjs.generator.scope.ScopeBuilder;
@@ -101,8 +102,8 @@ public class Generator {
 
 		CompilationUnit cu = parseAndResolve(classLoaderWrapper, inputFile, context);
 
-		if(configuration.isMinified()){
-			minify(classLoaderWrapper, cu, context);
+		if(configuration.getMinifyLevel().isMoreAgressiveThan(MinifyLevel.PARAMETERS_AND_LOCALS)){
+			minify(classLoaderWrapper, cu, configuration.getMinifyLevel(), context);
 		}
 		
 		FileWriter writer = null;
@@ -145,9 +146,9 @@ public class Generator {
 	}
 
 	private void minify(ClassLoaderWrapper classLoaderWrapper,
-			CompilationUnit cu, GenerationContext context) {
+			CompilationUnit cu, MinifyLevel level, GenerationContext context) {
 		
-		NameAllocatorVisitor visitor = new NameAllocatorVisitor();
+		NameAllocatorVisitor visitor = new NameAllocatorVisitor(level);
 		visitor.visit(cu, null);
 		
 	}
