@@ -1,5 +1,9 @@
 package org.stjs.generator.minify;
 
+/**
+ * Allocates distinct, predictable, non-conflicting short names. The names are generated following a pattern similar to
+ * excel column names, but since the generated names are case sensitive, both lowercase and uppercase letters are used.
+ */
 public class NameAllocator {
 
 	private int next = 1;
