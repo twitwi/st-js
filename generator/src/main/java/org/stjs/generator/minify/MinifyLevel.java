@@ -19,7 +19,8 @@ public enum MinifyLevel {
 	 * Same as WHITESPACE, but will also shorten the names of function parameters 
 	 * and local variable. This is the safest option that still provides some level of 
 	 * minification. Just as with the WHITESPACE option, all code depending on the 
-	 * generated javascript should still work as expected.
+	 * generated javascript should still work as expected. (Size of examples with this
+	 * option: 3648 Bytes, 91% of whitespace and comments size)
 	 */
 	PARAMETERS_AND_LOCALS ("locals", 2),
 	

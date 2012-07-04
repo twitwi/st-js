@@ -408,7 +408,12 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			// add an "_" for the arguments parameter to no override to arguments one.
 			printer.print("_");
 		}
-		printer.print(n.getName());
+		Variable var = resolvedVariable(n);
+		if(var.getMinifiedName() != null){
+			printer.print(var.getMinifiedName());
+		}else{
+			printer.print(var.getName());
+		}
 	}
 
 	@Override
@@ -1412,7 +1417,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			}
 		}
 
-		printer.print(n.getName());
+		if(var != null && var.getMinifiedName() != null){
+			printer.print(var.getMinifiedName());
+		} else {
+			printer.print(n.getName());
+		}
 	}
 
 	@Override
