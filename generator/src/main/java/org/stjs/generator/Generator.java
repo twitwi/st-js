@@ -113,7 +113,8 @@ public class Generator {
 			// generate the javascript code
 			JavascriptWriterVisitor generatorVisitor = new JavascriptWriterVisitor(
 					configuration.isGenerateSourceMap(),
-					configuration.getMinifyLevel());
+					configuration.getMinifyLevel(),
+					configuration.isForcePrintWhitespace());
 			generatorVisitor.visit(cu, context);
 
 			writer = new FileWriter(outputFile);

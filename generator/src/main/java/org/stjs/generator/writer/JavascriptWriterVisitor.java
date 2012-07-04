@@ -162,12 +162,18 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	private int currentComment = 0;
 	
 	private MinifyLevel minifyLevel;
+	
+	private boolean forcePrintWhitespace;
 
-	public JavascriptWriterVisitor(boolean generateSourceMap, MinifyLevel minifyLevel) {
+	public JavascriptWriterVisitor(boolean generateSourceMap, MinifyLevel minifyLevel, boolean forcePrintWhitespace) {
 		this.minifyLevel = minifyLevel;
+		this.forcePrintWhitespace = forcePrintWhitespace;
 		specialMethodHandlers = new SpecialMethodHandlers();
 		names = new DefaultNameProvider();
-		printer = new JavascriptWriter(generateSourceMap, minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS));
+		printer = new JavascriptWriter( 
+				generateSourceMap, 
+				!forcePrintWhitespace && minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS)
+				);
 	}
 
 	public String getGeneratedSource() {
@@ -1702,28 +1708,28 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 	
 	private String padLeft(String str){
-		if(minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS)){
+		if(!forcePrintWhitespace && minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS)){
 			return str;
 		}
 		return " " + str;
 	}
 	
 	private String padRight(String str){
-		if(minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS)){
+		if(!forcePrintWhitespace && minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS)){
 			return str;
 		}
 		return str + " ";
 	}
 	
 	private String padBoth(String str){
-		if(minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS)){
+		if(!forcePrintWhitespace && minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS)){
 			return str;
 		}
 		return " " + str + " ";
 	}
 	
 	private String padRightIfNotBlock(String str, Statement n){
-		if(minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS) && n instanceof BlockStmt){
+		if(!forcePrintWhitespace && minifyLevel.isMoreAggressiveOrEquals(MinifyLevel.WHITESPACE_AND_COMMENTS) && n instanceof BlockStmt){
 			return str;
 		}
 		return str + " ";

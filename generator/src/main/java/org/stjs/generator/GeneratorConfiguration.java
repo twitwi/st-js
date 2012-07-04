@@ -26,14 +26,17 @@ public class GeneratorConfiguration {
 	private final boolean generateArrayHasOwnProperty;
 	private final boolean generateSourceMap;
 	private final MinifyLevel minifyLevel;
+	private boolean forcePrintWhitespace;
 
 	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses,
-			boolean generateArrayHasOwnProperty, boolean generateSourceMap, MinifyLevel minifyLevel) {
+			boolean generateArrayHasOwnProperty, boolean generateSourceMap, MinifyLevel minifyLevel,
+			boolean forcePrintWhitespace) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.generateArrayHasOwnProperty = generateArrayHasOwnProperty;
 		this.generateSourceMap = generateSourceMap;
 		this.minifyLevel = minifyLevel;
+		this.forcePrintWhitespace = forcePrintWhitespace;
 	}
 
 	/**
@@ -59,6 +62,10 @@ public class GeneratorConfiguration {
 	
 	public MinifyLevel getMinifyLevel(){
 		return minifyLevel;
+	}
+	
+	public boolean isForcePrintWhitespace(){
+		return this.forcePrintWhitespace;
 	}
 
 }

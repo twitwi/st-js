@@ -33,6 +33,14 @@ public class GeneratorConfigurationBuilder {
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap = false;
 	private MinifyLevel minifyLevel = MinifyLevel.NONE;
+	
+	/**
+	 * Forces whitespace to be printed even when minification is enabled. This option is
+	 * meant for debugging purposes. It is hard enough to verify the correctness of
+	 * Minified code with whitespace, but it really is hell without. This option
+	 * relieves the pain.
+	 */
+	private boolean forcePrintWhitespace = false;
 
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {
 		allowedPackages.add(packageName);
@@ -68,6 +76,11 @@ public class GeneratorConfigurationBuilder {
 		minifyLevel = l;
 		return this;
 	}
+	
+	public GeneratorConfigurationBuilder forcePrintWhitespace(boolean b){
+		this.forcePrintWhitespace = b;
+		return this;
+	}
 
 	public GeneratorConfiguration build() {
 		allowedJavaLangClasses.add("Object");
@@ -89,7 +102,7 @@ public class GeneratorConfigurationBuilder {
 		allowedPackages.add("java.lang");
 
 		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateArrayHasOwnProperty,
-				generateSourceMap, minifyLevel);
+				generateSourceMap, minifyLevel, forcePrintWhitespace);
 	}
 
 }
