@@ -1549,7 +1549,12 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.print("if(!(");
 		n.getIterable().accept(this, context);
 		printer.print(").hasOwnProperty(");
-		printer.print(n.getVariable().getVars().get(0).getId().getName());
+		Variable var = resolvedVariable(n.getVariable().getVars().get(0).getId());
+		if(var.getMinifiedName() != null){
+			printer.print(var.getMinifiedName());
+		} else {
+			printer.print(var.getName());
+		}
 		printer.printLn(")) continue;");
 	}
 

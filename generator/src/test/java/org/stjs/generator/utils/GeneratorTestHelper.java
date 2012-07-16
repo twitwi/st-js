@@ -37,7 +37,6 @@ public class GeneratorTestHelper {
 	private static final String TEMP_GENERATION_PATH = "temp-generated-js";
 
 	/**
-	 * 
 	 * @param clazz
 	 * @return the javascript code generator from the given class
 	 */
@@ -45,12 +44,11 @@ public class GeneratorTestHelper {
 		return (String) executeOrGenerate(clazz, new GeneratorConfigurationBuilder(), false);
 	}
 
-	public static String generateMinified(Class<?> clazz, MinifyLevel level){
+	public static String generateMinified(Class<?> clazz, MinifyLevel level) {
 		return (String) executeOrGenerate(clazz, new GeneratorConfigurationBuilder().minifyLevel(level).generateSourceMap(false), false);
 	}
-	
+
 	/**
-	 * 
 	 * @param clazz
 	 * @return the javascript code generator from the given class
 	 */
@@ -82,7 +80,8 @@ public class GeneratorTestHelper {
 				}
 			}
 			throw new RuntimeException("Method " + method + " not found in class " + obj.getClass());
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -111,39 +110,31 @@ public class GeneratorTestHelper {
 		}
 		return js;
 	}
-	
 
 	private static Object executeOrGenerate(Class<?> clazz, GeneratorConfigurationBuilder conf, boolean execute) {
-		return executeOrGenerate(clazz, conf.allowedPackage("org.stjs.javascript")
-				.allowedPackage("org.stjs.generator").build(), execute);	
+		return executeOrGenerate(clazz, conf.allowedPackage("org.stjs.javascript").allowedPackage("org.stjs.generator").build(), execute);
 	}
 
 	/**
-	 * 
 	 * @param clazz
 	 * @return the javascript code generator from the given class
 	 */
 	private static Object executeOrGenerate(Class<?> clazz, GeneratorConfiguration config, boolean execute) {
-				Generator gen = new Generator();
+		Generator gen = new Generator();
 
 		File generationPath = new File("target", TEMP_GENERATION_PATH);
-		GenerationDirectory generationFolder = new GenerationDirectory(generationPath, new File(TEMP_GENERATION_PATH),
-				new File(""));
+		GenerationDirectory generationFolder = new GenerationDirectory(generationPath, new File(TEMP_GENERATION_PATH), new File(""));
 		String sourcePath = "src/test/java";
-		ClassWithJavascript stjsClass = gen.generateJavascript(
-				Thread.currentThread().getContextClassLoader(),
-				clazz.getName(),
-				new File(sourcePath),
-				generationFolder,
-				new File("target", "test-classes"),
-				config);
+		ClassWithJavascript stjsClass =
+				gen.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz.getName(), new File(sourcePath), generationFolder,
+						new File("target", "test-classes"), config);
 
 		File jsFile = new File(generationPath, stjsClass.getJavascriptFiles().get(0).getPath());
 		try {
 			String content = Files.toString(jsFile, Charset.defaultCharset());
 			List<File> javascriptFiles = new ArrayList<File>();
-			List<ClassWithJavascript> allDeps = new DependencyCollection(stjsClass).orderAllDependencies(Thread
-					.currentThread().getContextClassLoader());
+			List<ClassWithJavascript> allDeps =
+					new DependencyCollection(stjsClass).orderAllDependencies(Thread.currentThread().getContextClassLoader());
 			for (ClassWithJavascript dep : allDeps) {
 				for (URI js : dep.getJavascriptFiles()) {
 					javascriptFiles.add(new File(generationPath, js.getPath()));
@@ -154,10 +145,12 @@ public class GeneratorTestHelper {
 				return execResult != null ? execResult.getResult() : null;
 			}
 			return content;
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		} catch (ScriptException ex) {
+		}
+		catch (ScriptException ex) {
 			// display the generated code in case of exception
 			for (URI file : stjsClass.getJavascriptFiles()) {
 				displayWithLines(new File(generationPath, file.getPath()));
@@ -166,13 +159,16 @@ public class GeneratorTestHelper {
 		}
 	}
 
+	public static void assertMinifiedCodeContains(Class<?> clazz, MinifyLevel level, String snippet) {
+		assertCodeContains(generateMinified(clazz, level), snippet);
+	}
+
 	public static void assertCodeContains(Class<?> clazz, String snippet) {
 		assertCodeContains(generate(clazz), snippet);
 	}
 
 	/**
 	 * checks if the searched snippet is found inside the given code. The whitespaces are not taken into account
-	 * 
 	 * @param code
 	 * @param search
 	 */
@@ -188,7 +184,6 @@ public class GeneratorTestHelper {
 
 	/**
 	 * checks if the searched snippet is not found inside the given code. The whitespaces are not taken into account
-	 * 
 	 * @param code
 	 * @param search
 	 */
@@ -210,16 +205,20 @@ public class GeneratorTestHelper {
 				System.out.println(line);
 				lineNo++;
 			}
-		} catch (FileNotFoundException e) {
+		}
+		catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
-		} finally {
+		}
+		finally {
 			try {
 				if (in != null) {
 					in.close();
 				}
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				// silent
 			}
 

@@ -1,0 +1,23 @@
+package org.stjs.generator.minify;
+
+import static org.stjs.generator.minify.MinifyLevel.PARAMETERS_AND_LOCALS;
+import static org.stjs.generator.utils.GeneratorTestHelper.assertMinifiedCodeContains;
+
+import org.junit.Test;
+
+public class MinifyLocalsTests {
+	@Test
+	public void testMethodParametersAndLocals() {
+		assertMinifiedCodeContains(Minify1.class, PARAMETERS_AND_LOCALS, "Minify1.prototype.average=function(a, b){var c = a+b;");
+	}
+
+	@Test
+	public void testTryCatch() {
+		assertMinifiedCodeContains(Minify2.class, PARAMETERS_AND_LOCALS, "catch(c){var d = c.toString();}");
+	}
+
+	@Test
+	public void testForEach() {
+		assertMinifiedCodeContains(Minify3.class, PARAMETERS_AND_LOCALS, "for(var b in a){if(!(a).hasOwnProperty(b)) continue;");
+	}
+}
