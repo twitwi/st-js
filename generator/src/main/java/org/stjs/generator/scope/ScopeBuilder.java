@@ -407,8 +407,17 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		// TODO : this is broken in Java7 because a catch block might declare more than one exception
 		// would need a new javap
 		BasicScope scope = new BasicScope(currentScope, context);
-		scope.addVariable(new ParameterVariable(resolveType(scope, n.getExcept().getType()), n.getExcept().getId()
-				.getName()));
+		ParameterVariable var = new ParameterVariable( //
+				resolveType(scope, n.getExcept().getType()), // 
+				n.getExcept().getId().getName());
+		scope.addVariable(var);
+
+		resolvedType(n.getExcept(), var.getType());
+		resolvedType(n.getExcept().getId(), var.getType());
+		resolvedVariable(n.getExcept(), var);
+		resolvedVariable(n.getExcept().getId(), var);
+		resolvedVariableScope(n.getExcept(), scope);
+		resolvedVariableScope(n.getExcept().getId(), scope);
 		super.visit(n, scope);
 	}
 

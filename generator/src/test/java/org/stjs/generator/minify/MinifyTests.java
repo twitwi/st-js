@@ -9,4 +9,9 @@ public class MinifyTests {
 	public void testMethodParameters() {
 		generateMinified(Minify1.class, MinifyLevel.PARAMETERS_AND_LOCALS);
 	}
+
+	@Test
+	public void testMethodParametersWithTryCatch() {
+		generateMinified(Minify2.class, MinifyLevel.PARAMETERS_AND_LOCALS);
+	}
 }
