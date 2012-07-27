@@ -66,7 +66,7 @@ public class TypeWrappers {
 		} else if (type instanceof GenericArrayType) {
 			w = new GenericArrayTypeWrapper((GenericArrayType) type);
 		} else if (type instanceof Class) {
-			return new ClassWrapper((Class) type);
+			w = new ClassWrapper((Class) type);
 		} else {
 			throw new IllegalArgumentException("Cannot handle the type:" + type);
 		}
