@@ -12,9 +12,16 @@ import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.type.TypeWrapper;
 
 /**
- * A graph of types connected through inheritance/behavior (extends, implements) relationships. 
- * Each type in this graph can reach all the other types also in this graph by following 
- * an arbitrary number of edges up or down the inheritance hierarchy.  
+ * A strongly connected graph of types linked through inheritance/behavior (extends, implements) 
+ * relationships. Since this is a strongly connected graph, each node in this graph can reach all
+ * the other nodes of this graph by following an arbitrary number of edges. Each extends (or implements)
+ * relationship between types (ie: nodes) leads to two edges being created, one labeled extends
+ * (or implements) and one labeled extendedBy (or implementedBy).<br>
+ * <br>
+ * In a type graph, two interfaces which are declared in Java to extend one another (eg: interface A extends B)
+ * will be linked by implements and implementedBy edges. This is because this graph considers interface extension
+ * to be an extension of behavior rather than type, and is therefore more accurately represented by implements/
+ * implementedBy edges.
  */
 public class TypeGraph {
 
@@ -22,8 +29,7 @@ public class TypeGraph {
 	
 	/**
 	 * Constructs a new TypeGraph containing only the specified type. The specified type can only be
-	 * an interface that doesn't implement any other interface, or a class that extends Object and does
-	 * not implement any interface.
+	 * a root node.
 	 */
 	public TypeGraph(ClassWrapper type){
 		Class<?> clazz = type.getClazz();
@@ -38,6 +44,12 @@ public class TypeGraph {
 		this.nodes.put(type, node);
 	}
 	
+	/**
+	 * Creates extends and extendedBy edges between the nodes associated to the specified types. If the specified
+	 * type does not have an associated node in the graph, such a node will be created. If the specified super type
+	 * does not have a associated node in the grah, an IllegalArgumentException is thrown. If the specified super
+	 * type is an interface, an IllegalArgumentException is thrown.
+	 */
 	public TypeGraphNode connectWithExtends(ClassWrapper type, ClassWrapper superType){
 		if(type == null){
 			throw new IllegalArgumentException("Cannot add a null type");
@@ -45,8 +57,6 @@ public class TypeGraph {
 			throw new IllegalArgumentException("Cannot connect type to a null superType");
 		} else if(superType.getClazz() == Object.class){
 			throw new IllegalArgumentException("Cannot connect type to java.lang.Object");
-//		} else if(getNode(type) != null) {
-//			throw new IllegalArgumentException("Type " + type.getName() + " is already in the graph");
 		} else if(superType.isInterface()){
 			throw new IllegalArgumentException("Type " + type.getName() + " is an interface");
 		}
@@ -65,13 +75,17 @@ public class TypeGraph {
 		return node;
 	}
 	
+	/**
+	 * Creates implements and implementedBy edges between the nodes associated to the specified types. 
+	 * If the specified implementing type does not have an associated node in the graph, such a node will 
+	 * be created. If the specified implemented type does not have a associated node in the grah, an 
+	 * IllegalArgumentException is thrown.
+	 */
 	public TypeGraphNode connectWithImplements(ClassWrapper type, ClassWrapper implementedInterface){
 		if(type == null){
 			throw new IllegalArgumentException("Cannot add a null type");
 		} else if(implementedInterface == null){
 			throw new IllegalArgumentException("Cannot connect type to a null interface");
-//		} else if(getNode(type) != null) {
-//			throw new IllegalArgumentException("Type " + type.getName() + " is already in the graph");
 		} else if(!implementedInterface.isInterface()){
 			throw new IllegalArgumentException("Type " + type.getName() + " is not an interface");
 		}
@@ -134,10 +148,16 @@ public class TypeGraph {
 		target.nodes.put(commonType, thisCommon);
 	}
 	
+	/**
+	 * Returns the node of the graph associated to the specified type.
+	 */
 	public TypeGraphNode getNode(ClassWrapper type){
 		return this.nodes.get(type);
 	}
 	
+	/**
+	 * Returns a set containing all the nodes in this graph.
+	 */
 	public Set<TypeGraphNode> getNodes(){
 		return new HashSet<TypeGraphNode>(this.nodes.values());
 	}

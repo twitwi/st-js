@@ -11,11 +11,13 @@ import org.stjs.generator.type.TypeWrapper;
 
 /**
  * A collection of disconnected TypeGraph. Each type added to this TypeForest exists within
- * one and only one TypeGraph.<br>
+ * one and only one TypeGraph. There is no overlap between any of the graphs contained in this
+ * TypeForest. The forest is build by adding each participating one by one through the addType()
+ * method.<br>
  * <br>
- * We expect each TypeGraph to contain few items (since they only represent types linked 
- * through inheritance), but to have a lot of independent TypeGraph (most types are completely 
- * unrelated).
+ * Note: We expect each TypeGraph to contain few TypeGraphNodes (since they only represent types 
+ * linked through inheritance and not composition), but to have a lot of independent TypeGraph 
+ * (most types are completely unrelated).
  */
 public class TypeForest {
 
@@ -24,6 +26,14 @@ public class TypeForest {
 	 */
 	private Map<ClassWrapper, TypeGraph> index = new HashMap<ClassWrapper, TypeGraph>();
 	
+	/**
+	 * Adds the specified type, all its super classes and implemented interfaces recursively 
+	 * to this TypeForest. The specified type and all its super classes and implemented 
+	 * interfaces are guaranteed to be added to the same TypeGraph, and to only exist within 
+	 * that one TypeGraph. This method will create and/or merge as many TypeGraph as necessary 
+	 * to maintain the basic constraints of a TypeForest: all the contained TypeGraph are 
+	 * disconnected and do not overlap, and each type exists within one and only one TypeGraph.
+	 */
 	public void addType(ClassWrapper type){
 		if(type == null){
 			throw new IllegalArgumentException("Cannot add a null type");
@@ -32,7 +42,7 @@ public class TypeForest {
 		doAddType(type);
 	}
 	
-	public boolean doAddType(ClassWrapper type){
+	private boolean doAddType(ClassWrapper type){
 		if(type == null || type.getClazz() == Object.class){
 			// we are already at the root of the inheritance hierarchy,stop the recursion
 			return false;

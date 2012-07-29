@@ -8,15 +8,16 @@ import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.type.TypeWrapper;
 
 public class TypeGraphNode {
-	// this node
+	/** The type associated to this node. */
 	private final ClassWrapper type;
 	
-	// the edges in the direction of the inheritance roots
+	/** The "extends" edge of the graph leaving from this node. */
 	private TypeGraphNode superClass;
 
+	/** The "implements" edges of the graph leaving from this node. */
 	private final List<TypeGraphNode> interfaces = new ArrayList<TypeGraphNode>();
 	
-	// the edges in the direction of the inheritance leafs
+	/** The "implementedBy" and "extendedBy" edges of the graph leaving from this node. */
 	private final List<TypeGraphNode> subTypes = new ArrayList<TypeGraphNode>();
 	
 	public TypeGraphNode(ClassWrapper type){
