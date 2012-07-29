@@ -30,6 +30,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +60,7 @@ public class ClassWrapper implements TypeWrapper {
 	private Map<String, FieldWrapper> fields = null;
 	private Map<String, TypeWrapper> types = null;
 	private Multimap<String, MethodWrapper> methods = null;
+	private String minifiedName;
 
 	public ClassWrapper(Class<?> clazz) {
 		this.clazz = clazz;
@@ -452,5 +454,26 @@ public class ClassWrapper implements TypeWrapper {
 	@Override
 	public TypeWrapper getSuperClass() {
 		return TypeWrappers.wrap(clazz.getGenericSuperclass());
+	}
+	
+	@Override
+	public List<TypeWrapper> getInterfaces() {
+		List<TypeWrapper> ifaces = new ArrayList<TypeWrapper>();
+		for(Class<?> iface : clazz.getInterfaces()){
+			ifaces.add(TypeWrappers.wrap(iface));
+		}
+		return ifaces;
+	}
+	
+	public boolean isInterface(){
+		return clazz.isInterface();
+	}
+
+	public String getMinifiedName() {
+		return minifiedName;
+	}
+
+	public void setMinifiedName(String minifiedName) {
+		this.minifiedName = minifiedName;
 	}
 }

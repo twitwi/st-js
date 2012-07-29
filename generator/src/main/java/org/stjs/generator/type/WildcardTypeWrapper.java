@@ -18,6 +18,8 @@ package org.stjs.generator.type;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.stjs.generator.utils.Option;
 
@@ -118,5 +120,11 @@ public class WildcardTypeWrapper implements TypeWrapper {
 	public TypeWrapper getSuperClass() {
 		// TODO should this be something else !?
 		return null;
+	}
+
+	@Override
+	public Collection<TypeWrapper> getInterfaces() {
+		// TODO should this be something else !?
+		return Collections.emptyList();
 	}
 }

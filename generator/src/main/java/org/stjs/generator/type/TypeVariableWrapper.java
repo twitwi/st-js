@@ -19,6 +19,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.stjs.generator.utils.Option;
 
@@ -158,6 +160,12 @@ public class TypeVariableWrapper<D extends GenericDeclaration> implements TypeWr
 	public TypeWrapper getSuperClass() {
 		// TODO should this be something else !?
 		return null;
+	}
+
+	@Override
+	public Collection<TypeWrapper> getInterfaces() {
+		// TODO should this be something else !?
+		return Collections.emptyList();
 	}
 
 }

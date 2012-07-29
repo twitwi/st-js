@@ -17,6 +17,7 @@ package org.stjs.generator.type;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Collection;
 
 import org.stjs.generator.utils.Option;
 
@@ -58,4 +59,5 @@ public interface TypeWrapper {
 
 	public TypeWrapper getSuperClass();
 
+	public Collection<TypeWrapper> getInterfaces();
 }
