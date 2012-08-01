@@ -73,6 +73,22 @@ public class TestTypeForest {
 		assertRootNode(graph, Vehicle.class);
 	}
 	
+	@Test
+	public void testDiamondInterfaceInheritance(){
+		// when
+		forest.addType(wrap(DiamondImpl.class));
+		
+		// then
+		assertGraphCount(forest, 1);
+		TypeGraph graph = forest.getGraph(wrap(DiamondImpl.class));
+		assertNodeCount(graph, 4);
+		assertRootNode(graph, Diamond1.class);
+		assertLeafNode(graph, DiamondImpl.class);
+		assertEdges(graph, DiamondA.class, null, Diamond1.class);
+		assertEdges(graph, DiamondB.class, null, Diamond1.class);
+		assertEdges(graph, DiamondImpl.class, null, DiamondA.class, DiamondB.class);
+	}
+	
 	// We must be able to build exactly the same tree no matter which order the classes are added. 
 	// The three tests below are designed to verify that constraint.
 	
