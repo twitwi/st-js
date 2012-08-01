@@ -6,6 +6,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.stjs.generator.type.TypeWrappers.wrap;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.Assert;
 import org.junit.Test;
 
 public class TestTypeForest {
@@ -89,6 +93,32 @@ public class TestTypeForest {
 		assertEdges(graph, DiamondImpl.class, null, DiamondA.class, DiamondB.class);
 	}
 	
+	@Test
+	public void testCanonicalGraphSuperInterfaceFirst(){
+		doTestCanonicalGraph(CanonicalImpl.class);
+	}
+	
+	@Test
+	public void testCanonicalGraphSubInterfaceFirst(){
+		doTestCanonicalGraph(CanonicalImpl2.class);
+	}
+	
+	private void doTestCanonicalGraph(Class<?> implementor){
+		// when
+		forest.addType(wrap(implementor));
+		
+		// then
+		assertGraphCount(forest, 1);
+		TypeGraph graph = forest.getGraph(wrap(implementor));
+		assertNodeCount(graph, 3);
+		assertRootNode(graph, Canonical1.class);
+		assertLeafNode(graph, implementor);
+		assertEdges(graph, Canonical2.class, null, Canonical1.class);
+		assertEdges(graph, implementor, null, Canonical2.class);
+		assertAncestors(graph, implementor, Canonical1.class, Canonical2.class);
+		assertAncestors(graph, Canonical2.class, Canonical1.class);
+	}
+	
 	// We must be able to build exactly the same tree no matter which order the classes are added. 
 	// The three tests below are designed to verify that constraint.
 	
@@ -116,10 +146,7 @@ public class TestTypeForest {
 	private void doTestFullForest(Class<?>... classes){
 		// when
 		for(Class<?> clazz : classes){
-			System.out.println("About to add " + clazz);
 			forest.addType(wrap(clazz));
-			System.out.println("After adding " + clazz);
-			System.out.println(forest);
 		}
 		
 		// then
@@ -145,6 +172,13 @@ public class TestTypeForest {
 		assertEdges(graph, Dog.class, Animal.class);
 		assertEdges(graph, Car.class, Vehicle.class, Honker.class);
 		assertEdges(graph, Boat.class, Vehicle.class, Honker.class);
+		assertAncestors(graph, Boat.class, Vehicle.class, Honker.class);
+		assertAncestors(graph, Car.class, Vehicle.class, Honker.class);
+		assertAncestors(graph, Dog.class, Animal.class);
+		assertAncestors(graph, Duck.class, Animal.class, Flyer.class);
+		assertAncestors(graph, MelodiousHonker.class, Honker.class);
+		assertAncestors(graph, MonsterTruck.class, Vehicle.class, Car.class, Honker.class, MelodiousHonker.class);
+		assertAncestors(graph, Plane.class, Vehicle.class, Flyer.class);
 	}
 	
 	private static void assertGraphCount(TypeForest forest, int expectedGraphCount){
@@ -169,6 +203,7 @@ public class TestTypeForest {
 		assertEquals(0, node.getInterfaces().size());
 		assertNull(node.getSuperClass());
 		assertEquals(wrap(clazz), node.getType());
+		assertEquals(0, node.getAncestors().size());
 	}
 	
 	private static void assertLeafNode(TypeGraph graph, Class<?> clazz){
@@ -176,6 +211,7 @@ public class TestTypeForest {
 		assertNotNull(node);
 		assertEquals(wrap(clazz), node.getType());
 		assertEquals(0, node.getSubTypes().size());
+		assertTrue(node.getAncestors().size() > 0);
 	}
 	
 	private static void assertEdges(TypeGraph graph, Class<?> clazz, Class<?> superClass, Class<?>... ifaces){
@@ -218,5 +254,16 @@ public class TestTypeForest {
 	
 	private static void assertInterfacesContain(TypeGraphNode node, TypeGraphNode ifaceNode){
 		assertTrue(node.getInterfaces().contains(ifaceNode));
+	}
+	
+	private static void assertAncestors(TypeGraph graph, Class<?> clazz, Class<?>... ancestors){
+		TypeGraphNode node = graph.getNode(wrap(clazz));
+		Set<TypeGraphNode> ancestorNodes = new HashSet<TypeGraphNode>();
+		for(Class<?> c : ancestors){
+			TypeGraphNode n = graph.getNode(wrap(c));
+			assertNotNull("Graph does not contain a node for " + c, n);
+			ancestorNodes.add(n);
+		}
+		assertEquals(ancestorNodes, node.getAncestors());
 	}
 }

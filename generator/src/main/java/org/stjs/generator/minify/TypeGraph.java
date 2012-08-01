@@ -12,7 +12,7 @@ import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.type.TypeWrapper;
 
 /**
- * A strongly connected graph of types linked through inheritance/behavior (extends, implements) 
+ * A strongly connected, canonical graph of types linked through inheritance/behavior (extends, implements) 
  * relationships. Since this is a strongly connected graph, each node in this graph can reach all
  * the other nodes of this graph by following an arbitrary number of edges. Each extends (or implements)
  * relationship between types (ie: nodes) leads to two edges being created, one labeled extends
@@ -21,7 +21,29 @@ import org.stjs.generator.type.TypeWrapper;
  * In a type graph, two interfaces which are declared in Java to extend one another (eg: interface A extends B)
  * will be linked by implements and implementedBy edges. This is because this graph considers interface extension
  * to be an extension of behavior rather than type, and is therefore more accurately represented by implements/
- * implementedBy edges.
+ * implementedBy edges.<br>
+ * <br>
+ * The type graph represented by this class is guaranteed to be canonical. It contains the minimum number of
+ * edges required to accurately describe the type hierarchy. This also means that, in some cases, the graph may 
+ * not reflect exactly the interface inheritance as declared in the java source code. Example:
+ * <pre>
+ * interface A {}
+ * interface B extends A {}
+ * class Z implements A, B {}
+ * </pre>
+ * According to the java source, Z implements both A and B. But since implementing B already implies implementing
+ * A, a TypeGraph will only reflect the following (canonical) structure:
+ * <pre>
+ *             A
+ *            ^ \
+ * implements | | implementedBy
+ *            \ v
+ *             B
+ *            ^ \
+ * implements | | implementedBy
+ *            \ v
+ *             Z
+ * </pre>
  */
 public class TypeGraph {
 
