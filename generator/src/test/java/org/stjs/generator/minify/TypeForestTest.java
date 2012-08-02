@@ -12,7 +12,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TestTypeForest {
+public class TypeForestTest {
 	
 	TypeForest forest = new TypeForest();
 	
