@@ -23,9 +23,7 @@ import org.stjs.generator.minify.MinifyLevel;
 
 /**
  * Use this class to build a configuration needed by the {@link Generator}
- * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
- * 
  */
 public class GeneratorConfigurationBuilder {
 	private Collection<String> allowedPackages = new HashSet<String>();
@@ -33,12 +31,10 @@ public class GeneratorConfigurationBuilder {
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap = false;
 	private MinifyLevel minifyLevel = MinifyLevel.NONE;
-	
+
 	/**
-	 * Forces whitespace to be printed even when minification is enabled. This option is
-	 * meant for debugging purposes. It is hard enough to verify the correctness of
-	 * Minified code with whitespace, but it really is hell without. This option
-	 * relieves the pain.
+	 * Forces whitespace to be printed even when minification is enabled. This option is meant for debugging purposes. It is hard enough to
+	 * verify the correctness of Minified code with whitespace, but it really is hell without. This option relieves the pain.
 	 */
 	private boolean forcePrintWhitespace = false;
 
@@ -71,13 +67,13 @@ public class GeneratorConfigurationBuilder {
 		generateSourceMap = b;
 		return this;
 	}
-	
-	public GeneratorConfigurationBuilder minifyLevel(MinifyLevel l){
+
+	public GeneratorConfigurationBuilder minifyLevel(MinifyLevel l) {
 		minifyLevel = l;
 		return this;
 	}
-	
-	public GeneratorConfigurationBuilder forcePrintWhitespace(boolean b){
+
+	public GeneratorConfigurationBuilder forcePrintWhitespace(boolean b) {
 		this.forcePrintWhitespace = b;
 		return this;
 	}
@@ -101,8 +97,8 @@ public class GeneratorConfigurationBuilder {
 
 		allowedPackages.add("java.lang");
 
-		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateArrayHasOwnProperty,
-				generateSourceMap, minifyLevel, forcePrintWhitespace);
+		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateArrayHasOwnProperty, generateSourceMap, minifyLevel,
+				forcePrintWhitespace);
 	}
 
 }

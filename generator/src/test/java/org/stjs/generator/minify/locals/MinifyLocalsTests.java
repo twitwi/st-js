@@ -20,4 +20,14 @@ public class MinifyLocalsTests {
 	public void testForEach() {
 		assertMinifiedCodeContains(Minify3.class, PARAMETERS_AND_LOCALS, "for(var b in a){if(!(a).hasOwnProperty(b)) continue;");
 	}
+
+	@Test
+	public void testInnerClassMethod() {
+		assertMinifiedCodeContains(Minify4.class, PARAMETERS_AND_LOCALS, "Minify4.Builder.prototype.build=function(a,b){return a+b;}");
+	}
+
+	@Test
+	public void testAnonymousClassMethod() {
+		assertMinifiedCodeContains(Minify5.class, PARAMETERS_AND_LOCALS, "_InlineType.prototype.handle=function(a, b){var c = a + \" : \" + b;}");
+	}
 }
