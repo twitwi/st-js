@@ -78,6 +78,13 @@ public class NameAllocatorVisitor extends ForEachNodeVisitor<Void> {
 			// parameter variables
 			var.setMinifiedName(allocator.nextName());
 		}
+
+		if (n.getInit() != null) {
+			// there is no visit(Expression) method, so let's just do it manually here
+			before(n.getInit(), arg);
+			n.getInit().accept(this, arg);
+			after(n.getInit(), arg);
+		}
 	}
 
 	private class MethodBodyContextBackup {

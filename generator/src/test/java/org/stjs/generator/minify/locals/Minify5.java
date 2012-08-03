@@ -8,8 +8,8 @@ public class Minify5 {
 
 	private static Handler handler = new Handler() {
 		@Override
-		public void handle(String name, int value) {
-			String str = name + " : " + value;
+		public void handle(String nameInner, int valueInner) {
+			String str = nameInner + " : " + valueInner;
 		}
 	};
 }
