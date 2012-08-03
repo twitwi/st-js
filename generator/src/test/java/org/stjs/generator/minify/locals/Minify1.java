@@ -1,4 +1,4 @@
-package org.stjs.generator.minify;
+package org.stjs.generator.minify.locals;
 
 public class Minify1 {
 

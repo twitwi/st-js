@@ -11,6 +11,9 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.stjs.generator.minify.locals.Minify1;
+import org.stjs.generator.minify.locals.Minify2;
+import org.stjs.generator.minify.locals.Minify3;
 
 public class TypeForestTest {
 	

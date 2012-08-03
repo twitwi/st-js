@@ -1,4 +1,4 @@
-package org.stjs.generator.minify;
+package org.stjs.generator.minify.locals;
 
 import static org.stjs.generator.minify.MinifyLevel.PARAMETERS_AND_LOCALS;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertMinifiedCodeContains;
