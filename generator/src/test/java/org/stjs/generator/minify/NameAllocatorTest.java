@@ -25,7 +25,7 @@ public class NameAllocatorTest {
 	}
 
 	private void doTestAllocation(int index, String expectedName) {
-		NameAllocator alloc = new NameAllocator();
+		NameIterator alloc = new NameIterator();
 
 		for (int i = 0; i < index; i++) {
 			alloc.nextName();

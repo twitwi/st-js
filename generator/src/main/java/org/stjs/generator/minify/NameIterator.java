@@ -8,7 +8,7 @@ import java.util.Set;
  * Allocates distinct, predictable, non-conflicting short names. The names are generated following a pattern similar to
  * excel column names, but since the generated names are case sensitive, both lowercase and uppercase letters are used.
  */
-public class NameAllocator {
+public class NameIterator {
 
 	private static final Set<String> JS_KEYWORDS = new HashSet<String>(Arrays.asList( //
 			"break", "case", "catch", "continue", "default", "delete", "do", "else", //

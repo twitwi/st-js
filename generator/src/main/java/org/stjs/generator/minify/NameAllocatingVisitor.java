@@ -12,14 +12,14 @@ import org.stjs.generator.variable.ParameterVariable;
 import org.stjs.generator.variable.Variable;
 import org.stjs.generator.visitor.ForEachNodeVisitor;
 
-public class NameAllocatorVisitor extends ForEachNodeVisitor<Void> {
+public class NameAllocatingVisitor extends ForEachNodeVisitor<Void> {
 
-	private NameAllocator allocator;
+	private NameIterator allocator;
 	private MinifyLevel level;
 
 	private boolean inMethodBody = false;
 
-	public NameAllocatorVisitor(MinifyLevel level) {
+	public NameAllocatingVisitor(MinifyLevel level) {
 		this.level = level;
 	}
 
@@ -55,7 +55,7 @@ public class NameAllocatorVisitor extends ForEachNodeVisitor<Void> {
 			//        //  and "jambon" even though they seem to be in different scopes.
 			// }}};
 
-			allocator = new NameAllocator();
+			allocator = new NameIterator();
 			inMethodBody = true;
 		}
 		return backup;
@@ -88,17 +88,17 @@ public class NameAllocatorVisitor extends ForEachNodeVisitor<Void> {
 	}
 
 	private class MethodBodyContextBackup {
-		NameAllocator allocator;
+		NameIterator allocator;
 		boolean inMethodBody;
 
 		MethodBodyContextBackup() {
-			this.allocator = NameAllocatorVisitor.this.allocator;
-			this.inMethodBody = NameAllocatorVisitor.this.inMethodBody;
+			this.allocator = NameAllocatingVisitor.this.allocator;
+			this.inMethodBody = NameAllocatingVisitor.this.inMethodBody;
 		}
 
 		void restore() {
-			NameAllocatorVisitor.this.allocator = allocator;
-			NameAllocatorVisitor.this.inMethodBody = inMethodBody;
+			NameAllocatingVisitor.this.allocator = allocator;
+			NameAllocatingVisitor.this.inMethodBody = inMethodBody;
 		}
 	}
 }

@@ -31,7 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.stjs.generator.minify.MinifyLevel;
-import org.stjs.generator.minify.NameAllocatorVisitor;
+import org.stjs.generator.minify.NameAllocatingVisitor;
 import org.stjs.generator.scope.CompilationUnitScope;
 import org.stjs.generator.scope.ScopeBuilder;
 import org.stjs.generator.type.ClassLoaderWrapper;
@@ -151,7 +151,7 @@ public class Generator {
 	private void minify(ClassLoaderWrapper classLoaderWrapper,
 			CompilationUnit cu, MinifyLevel level, GenerationContext context) {
 		
-		NameAllocatorVisitor visitor = new NameAllocatorVisitor(level);
+		NameAllocatingVisitor visitor = new NameAllocatingVisitor(level);
 		visitor.visit(cu, null);
 		
 	}
