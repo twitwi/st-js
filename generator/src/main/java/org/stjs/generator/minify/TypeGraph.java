@@ -184,6 +184,26 @@ public class TypeGraph {
 		return new HashSet<TypeGraphNode>(this.nodes.values());
 	}
 	
+	public Set<TypeGraphNode> getRootInterfaceNodes(){
+		HashSet<TypeGraphNode> roots = new HashSet<TypeGraphNode>();
+		for(TypeGraphNode node : this.nodes.values()){
+			if(node.isRootNode() && node.isInterface()){
+				roots.add(node);
+			}
+		}
+		return roots;
+	}
+	
+	public Set<TypeGraphNode> getRootClassNodes(){
+		HashSet<TypeGraphNode> roots = new HashSet<TypeGraphNode>();
+		for(TypeGraphNode node : this.nodes.values()){
+			if(node.isRootNode() && !node.isInterface()){
+				roots.add(node);
+			}
+		}
+		return roots;
+	}
+	
 	public String toString(){
 		StringWriter str = new StringWriter();
 		PrintWriter out = new PrintWriter(str);

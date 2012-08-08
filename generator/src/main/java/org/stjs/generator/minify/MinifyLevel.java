@@ -57,6 +57,10 @@ public enum MinifyLevel {
 		return this.level <= reference.level;
 	}
 	
+	public boolean isLessAggressiveThan(MinifyLevel reference){
+		return this.level < reference.level;
+	}
+	
 	public boolean isMoreAggressiveOrEquals(MinifyLevel reference){
 		return this.level >= reference.level;
 	}

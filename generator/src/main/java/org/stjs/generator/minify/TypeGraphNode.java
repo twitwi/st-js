@@ -29,6 +29,8 @@ public class TypeGraphNode {
 	 */
 	private final Set<TypeGraphNode> ancestorTypes = new HashSet<TypeGraphNode>();
 	
+	private final ConstrainedNameAllocator constraints = new ConstrainedNameAllocator();
+	
 	public TypeGraphNode(ClassWrapper type){
 		this.type = type;
 	}
