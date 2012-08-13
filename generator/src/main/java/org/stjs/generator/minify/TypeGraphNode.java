@@ -136,16 +136,6 @@ public class TypeGraphNode {
 		}
 	}
 	
-	/** Returns a read-only view of this nodes ancestor types. */
-	public Set<TypeGraphNode> getAncestors(){
-		return Collections.unmodifiableSet(this.ancestorTypes);
-	}
-	
-	/** returns a read-only view of this nodes descendant types. */
-	public Set<TypeGraphNode> getdescendants(){
-		return Collections.unmodifiableSet(this.descendantTypes);
-	}
-	
 	public void removeSubType(TypeGraphNode node){
 		this.subTypes.remove(node);
 	}

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.stjs.generator.type.TypeWrappers.wrap;
 
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -196,7 +197,7 @@ public class TypeForestTest {
 		assertNodeCount(graph, 1);
 		TypeGraphNode node = graph.getNode(wrap(clazz));
 		assertNotNull(node);
-		assertEquals(0, node.getSubTypes().size());
+		assertEquals(0, node.getDirectSubTypes().size());
 		assertRootNode(graph, clazz);
 	}
 	
@@ -206,15 +207,15 @@ public class TypeForestTest {
 		assertEquals(0, node.getInterfaces().size());
 		assertNull(node.getSuperClass());
 		assertEquals(wrap(clazz), node.getType());
-		assertEquals(0, node.getAncestors().size());
+		assertEquals(0, getAncestors(node).size());
 	}
 	
 	private static void assertLeafNode(TypeGraph graph, Class<?> clazz){
 		TypeGraphNode node = graph.getNode(wrap(clazz));
 		assertNotNull(node);
 		assertEquals(wrap(clazz), node.getType());
-		assertEquals(0, node.getSubTypes().size());
-		assertTrue(node.getAncestors().size() > 0);
+		assertEquals(0, node.getDirectSubTypes().size());
+		assertTrue(getAncestors(node).size() > 0);
 	}
 	
 	private static void assertEdges(TypeGraph graph, Class<?> clazz, Class<?> superClass, Class<?>... ifaces){
@@ -252,7 +253,7 @@ public class TypeForestTest {
 	}
 	
 	private static void assertSubtypesContain(TypeGraphNode node, TypeGraphNode expectedSubtype){
-		assertTrue(node.getSubTypes().contains(expectedSubtype));
+		assertTrue(node.getDirectSubTypes().contains(expectedSubtype));
 	}
 	
 	private static void assertInterfacesContain(TypeGraphNode node, TypeGraphNode ifaceNode){
@@ -267,6 +268,28 @@ public class TypeForestTest {
 			assertNotNull("Graph does not contain a node for " + c, n);
 			ancestorNodes.add(n);
 		}
-		assertEquals(ancestorNodes, node.getAncestors());
+		assertEquals(ancestorNodes, getAncestors(node));
+	}
+	
+	private static Set<TypeGraphNode> getAncestors(TypeGraphNode node){
+		return getPrivateNodeSet(node, "ancestorTypes");
+	}
+	
+	private static Set<TypeGraphNode> getDescendants(TypeGraphNode node){
+		return getPrivateNodeSet(node, "descendantTypes");
+	}
+
+	private static Set<TypeGraphNode> getPrivateNodeSet(TypeGraphNode node, String fieldName){
+		// we must do this to verify internal consistency of the object. I know this is not
+		// proper blackbox testing, but in this case it's worth it
+		try {
+			Field field = node.getClass().getDeclaredField(fieldName);
+			field.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			Set<TypeGraphNode> value = (Set<TypeGraphNode>) field.get(node);
+			return value;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
