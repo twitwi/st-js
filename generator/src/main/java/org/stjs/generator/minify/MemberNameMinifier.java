@@ -24,7 +24,30 @@ public class MemberNameMinifier {
 		}
 		
 		for(TypeGraphNode node : graph.getRootInterfaceNodes()){
-			
+			allocateInterfaceMemberNames(node);
+		}
+		
+		for(TypeGraphNode node : graph.getRootClassNodes()){
+			allocateClassMemberNames(node);
+		}
+	}
+	
+	private void allocateInterfaceMemberNames(TypeGraphNode ifaceNode){
+		ifaceNode.allocateMemberNames();
+		ifaceNode.passNamesDown();
+		ifaceNode.forceDistantRelativesNameConstraints();
+		
+		for(TypeGraphNode subIfaceNode : ifaceNode.getDirectSubInterfaces()){
+			allocateInterfaceMemberNames(subIfaceNode);
+		}
+	}
+
+	private void allocateClassMemberNames(TypeGraphNode classNode){
+		classNode.allocateMemberNames();
+		classNode.passNamesDown();
+		
+		for(TypeGraphNode subClassNode : classNode.getDirectSubClasses()){
+			allocateClassMemberNames(subClassNode);
 		}
 	}
 }

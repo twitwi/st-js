@@ -34,6 +34,7 @@ public class MethodWrapper {
 	private final int modifiers;
 	private final TypeWrapper ownerType;
 	private final boolean declared;
+	private String minifiedName;
 
 	public MethodWrapper(Method method, TypeWrapper returnType, TypeWrapper[] parameterTypes, int modifiers,
 			TypeVariableWrapper<Method>[] typeParameters, TypeWrapper ownerType, boolean declared) {
@@ -135,4 +136,11 @@ public class MethodWrapper {
 		return method.getAnnotation(annotationClass);
 	}
 
+	public String getMinifiedName() {
+		return minifiedName;
+	}
+
+	public void setMinifiedName(String minifiedName) {
+		this.minifiedName = minifiedName;
+	}
 }

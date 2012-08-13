@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.stjs.generator.type.ClassWrapper;
-import org.stjs.generator.type.TypeWrapper;
 
 public class TypeGraphNode {
 	/** The type associated to this node. */
@@ -29,7 +28,13 @@ public class TypeGraphNode {
 	 */
 	private final Set<TypeGraphNode> ancestorTypes = new HashSet<TypeGraphNode>();
 	
-	private final ConstrainedNameAllocator constraints = new ConstrainedNameAllocator();
+	/** 
+	 * All the nodes that are reachable from this node by following the "implementedBy" 
+	 * and "extendedBy" edges of the graph.
+	 */
+	private final Set<TypeGraphNode> descendantTypes = new HashSet<TypeGraphNode>();
+	
+	private final ConstrainedNameAllocator names = new ConstrainedNameAllocator();
 	
 	public TypeGraphNode(ClassWrapper type){
 		this.type = type;
@@ -69,13 +74,47 @@ public class TypeGraphNode {
 		
 		this.interfaces.add(iface); // add "implements" edge
 		iface.subTypes.add(this); // add "implementedBy" edge
+		iface.descendantTypes.add(this);
 		this.ancestorTypes.add(iface);
 		this.ancestorTypes.addAll(iface.ancestorTypes);
 	}
 	
-	/** Returns a read-only view of this nodes sub types. */
-	public List<TypeGraphNode> getSubTypes(){
+	/**
+	 * Returns a read-only view of this nodes sub types. The returned list contains items
+	 * that are the union of the sets returned by getDirectSubInterfaces(), and getDirectSubclasses(). 
+	 */
+	public List<TypeGraphNode> getDirectSubTypes(){
 		return Collections.unmodifiableList(subTypes);
+	}
+	
+	/**
+	 * Returns the set of interfaces that directly extend this node (in a canonical type graph). 
+	 * For nodes that represent classes the returned set is empty.
+	 */
+	public Set<TypeGraphNode> getDirectSubInterfaces(){
+		Set<TypeGraphNode> result = new HashSet<TypeGraphNode>();
+		for(TypeGraphNode n : this.subTypes){
+			if(n.isInterface()){
+				result.add(n);
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Returns the set of classes that directly extend this node. If this node represents a class, 
+	 * the returned set can either be empty or contain a single element. If this node represents
+	 * an interface, the set may contain multiple elements (all classes that directly implement 
+	 * the interface).
+	 */
+	public Set<TypeGraphNode> getDirectSubClasses(){
+		Set<TypeGraphNode> result = new HashSet<TypeGraphNode>();
+		for(TypeGraphNode n : this.subTypes){
+			if(!n.isInterface()){
+				result.add(n);
+			}
+		}
+		return result;
 	}
 	
 	/** Returns a read-only view of this nodes interfaces. */
@@ -91,14 +130,20 @@ public class TypeGraphNode {
 		this.superClass = superClass; // add "extends" edge
 		if(superClass != null){
 			superClass.subTypes.add(this); // add "extendedBy" edge
+			superClass.descendantTypes.add(this);
+			this.ancestorTypes.add(superClass);
+			this.ancestorTypes.addAll(superClass.ancestorTypes);
 		}
-		this.ancestorTypes.add(superClass);
-		this.ancestorTypes.addAll(superClass.ancestorTypes);
 	}
 	
 	/** Returns a read-only view of this nodes ancestor types. */
 	public Set<TypeGraphNode> getAncestors(){
 		return Collections.unmodifiableSet(this.ancestorTypes);
+	}
+	
+	/** returns a read-only view of this nodes descendant types. */
+	public Set<TypeGraphNode> getdescendants(){
+		return Collections.unmodifiableSet(this.descendantTypes);
 	}
 	
 	public void removeSubType(TypeGraphNode node){
@@ -110,14 +155,78 @@ public class TypeGraphNode {
 	}
 	
 	public boolean isLeafNode(){
-		return this.subTypes.size() == 0;
+		return this.subTypes.isEmpty();
 	}
 	
 	public boolean isRootNode(){
-		return this.superClass == null && this.interfaces.size() == 0;
+		return this.descendantTypes.isEmpty();
+	}
+	
+	/**
+	 * Allocates minified names for all the declared members of the type represented by 
+	 * this node. 
+	 */
+	public void allocateMemberNames(){
+		this.names.allocateAll(type);
+	}
+	
+	/**
+	 * Passes the minified names allocated to the members of the type represented by 
+	 * this node down to all subtype nodes recursively.
+	 */
+	public void passNamesDown(){
+		for(TypeGraphNode descendantNode : this.descendantTypes){
+			descendantNode.names.inheritFrom(this.names);
+		}
+	}
+	
+	/**
+	 * Propagates the names allocated to this node as forced allocations to all distant 
+	 * relatives of this node. The set of distant relatives of this node contains all the
+	 * nodes in the graph that are ancestors of this node's descendants, but excludes nodes
+	 * that are descendants or ancestors of this node...<br>
+	 * <br>
+	 * I feel an example would be useful in this case:
+	 * <pre>
+	 *     interface A     interface B
+	 *         ^               ^
+	 *          \              | implements
+	 *           \             |
+	 * implements \        interface C
+	 *             \           ^
+	 *              \         / implements
+	 *               \       /
+	 *                class Z
+	 * </pre>
+	 * Here are the distant relatives relationships for the case above:
+	 * <pre>
+	 * +------+-------------------+
+	 * | type | distant relatives |
+	 * +------+-------------------+
+	 * | A    | {B, C}            |
+	 * | B    | {A}               |
+	 * | C    | {A}               |
+	 * | Z    | {}                |
+	 * +------+-------------------+
+	 * </pre>
+	 */
+	public void forceDistantRelativesNameConstraints() {
+		// build the set of all relatives that can be considered distant
+		Set<TypeGraphNode> distantRelatives = new HashSet<TypeGraphNode>();
+		for(TypeGraphNode desc : this.descendantTypes){
+			distantRelatives.addAll(desc.ancestorTypes);
+		}
+		distantRelatives.removeAll(this.ancestorTypes);
+		distantRelatives.removeAll(this.descendantTypes);
+		
+		// propagate the constraints
+		for(TypeGraphNode relative : distantRelatives){
+			relative.names.force(this.names);
+		}
 	}
 	
 	public String toString(){
 		return this.type.getName();
 	}
+
 }

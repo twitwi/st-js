@@ -221,7 +221,7 @@ public class TypeGraph {
 	private void printNode(TypeGraphNode node, String indent, PrintWriter out){
 		out.print(indent);
 		out.println(node);
-		for(TypeGraphNode sub : node.getSubTypes()){
+		for(TypeGraphNode sub : node.getDirectSubTypes()){
 			printNode(sub, indent + "  ", out);
 		}
 	}
