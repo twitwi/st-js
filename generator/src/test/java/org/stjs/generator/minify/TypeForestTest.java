@@ -52,6 +52,8 @@ public class TypeForestTest {
 		TypeGraph graph = forest.getGraph(wrap(Dog.class));
 		assertNodeCount(graph, 2);
 		assertExtendsEdge(graph, Dog.class, Animal.class);
+		assertAncestors(graph, Dog.class, Animal.class);
+		assertDescendants(graph, Animal.class, Dog.class);
 	}
 	
 	@Test
@@ -64,6 +66,8 @@ public class TypeForestTest {
 		TypeGraph graph = forest.getGraph(wrap(MelodiousHonker.class));
 		assertNodeCount(graph, 2);
 		assertImplementsEdges(graph, MelodiousHonker.class, Honker.class);
+		assertAncestors(graph, MelodiousHonker.class, Honker.class);
+		assertDescendants(graph, Honker.class, MelodiousHonker.class);
 	}
 	
 	@Test
@@ -79,6 +83,9 @@ public class TypeForestTest {
 		assertExtendsEdge(graph, Car.class, Vehicle.class);
 		assertRootNode(graph, Honker.class);
 		assertRootNode(graph, Vehicle.class);
+		assertAncestors(graph, Car.class, Honker.class, Vehicle.class);
+		assertDescendants(graph, Vehicle.class, Car.class);
+		assertDescendants(graph, Honker.class, Car.class);
 	}
 	
 	@Test
@@ -95,6 +102,8 @@ public class TypeForestTest {
 		assertEdges(graph, DiamondA.class, null, Diamond1.class);
 		assertEdges(graph, DiamondB.class, null, Diamond1.class);
 		assertEdges(graph, DiamondImpl.class, null, DiamondA.class, DiamondB.class);
+		assertAncestors(graph, DiamondImpl.class, DiamondA.class, DiamondB.class, Diamond1.class);
+		assertDescendants(graph, Diamond1.class, DiamondA.class, DiamondB.class, DiamondImpl.class);
 	}
 	
 	@Test
@@ -183,6 +192,12 @@ public class TypeForestTest {
 		assertAncestors(graph, MelodiousHonker.class, Honker.class);
 		assertAncestors(graph, MonsterTruck.class, Vehicle.class, Car.class, Honker.class, MelodiousHonker.class);
 		assertAncestors(graph, Plane.class, Vehicle.class, Flyer.class);
+		assertDescendants(graph, Vehicle.class, Car.class, Plane.class, MonsterTruck.class, Boat.class);
+		assertDescendants(graph, Animal.class, Dog.class, Duck.class);
+		assertDescendants(graph, Honker.class, Car.class, Boat.class, MelodiousHonker.class, MonsterTruck.class);
+		assertDescendants(graph, Flyer.class, Duck.class, Plane.class);
+		assertDescendants(graph, MelodiousHonker.class, MonsterTruck.class);
+		assertDescendants(graph, Car.class, MonsterTruck.class);
 	}
 	
 	private static void assertGraphCount(TypeForest forest, int expectedGraphCount){
@@ -262,13 +277,22 @@ public class TypeForestTest {
 	
 	private static void assertAncestors(TypeGraph graph, Class<?> clazz, Class<?>... ancestors){
 		TypeGraphNode node = graph.getNode(wrap(clazz));
-		Set<TypeGraphNode> ancestorNodes = new HashSet<TypeGraphNode>();
-		for(Class<?> c : ancestors){
+		assertNodeSetContains(graph, getAncestors(node), ancestors);
+	}
+	
+	private static void assertDescendants(TypeGraph graph, Class<?> clazz, Class<?>... ancestors){
+		TypeGraphNode node = graph.getNode(wrap(clazz));
+		assertNodeSetContains(graph, getDescendants(node), ancestors);
+	}
+	
+	private static void assertNodeSetContains(TypeGraph graph, Set<TypeGraphNode> actualNodes, Class<?>[] classes){
+		Set<TypeGraphNode> expectedNodes = new HashSet<TypeGraphNode>();
+		for(Class<?> c : classes){
 			TypeGraphNode n = graph.getNode(wrap(c));
 			assertNotNull("Graph does not contain a node for " + c, n);
-			ancestorNodes.add(n);
+			expectedNodes.add(n);
 		}
-		assertEquals(ancestorNodes, getAncestors(node));
+		assertEquals(expectedNodes, actualNodes);
 	}
 	
 	private static Set<TypeGraphNode> getAncestors(TypeGraphNode node){

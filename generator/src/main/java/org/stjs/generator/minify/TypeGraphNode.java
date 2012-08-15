@@ -74,9 +74,16 @@ public class TypeGraphNode {
 		
 		this.interfaces.add(iface); // add "implements" edge
 		iface.subTypes.add(this); // add "implementedBy" edge
-		iface.descendantTypes.add(this);
+		iface.addDescendantType(this);
 		this.ancestorTypes.add(iface);
 		this.ancestorTypes.addAll(iface.ancestorTypes);
+	}
+	
+	private void addDescendantType(TypeGraphNode node){
+		this.descendantTypes.add(node);
+		for(TypeGraphNode ancestor : this.ancestorTypes){
+			ancestor.descendantTypes.add(node);
+		}
 	}
 	
 	/**
@@ -130,7 +137,7 @@ public class TypeGraphNode {
 		this.superClass = superClass; // add "extends" edge
 		if(superClass != null){
 			superClass.subTypes.add(this); // add "extendedBy" edge
-			superClass.descendantTypes.add(this);
+			superClass.addDescendantType(this);
 			this.ancestorTypes.add(superClass);
 			this.ancestorTypes.addAll(superClass.ancestorTypes);
 		}
@@ -138,8 +145,9 @@ public class TypeGraphNode {
 	
 	public void removeSubType(TypeGraphNode node){
 		this.subTypes.remove(node);
+		this.descendantTypes.remove(node);
 	}
-
+	
 	public boolean isInterface(){
 		return this.type.isInterface();
 	}
@@ -149,7 +157,7 @@ public class TypeGraphNode {
 	}
 	
 	public boolean isRootNode(){
-		return this.descendantTypes.isEmpty();
+		return this.ancestorTypes.isEmpty();
 	}
 	
 	/**
