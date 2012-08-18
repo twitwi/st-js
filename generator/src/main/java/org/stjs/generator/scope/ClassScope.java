@@ -35,13 +35,13 @@ public class ClassScope extends AbstractScope {
 		for (TypeWrapper typeParam : c.getTypeParameters()) {
 			addType(typeParam);
 		}
-		for (FieldWrapper field : c.getDeclaredFields()) {
+		for (FieldWrapper field : c.getAllFields()) {
 			addField(field);
 		}
-		for (MethodWrapper method : c.getDeclaredMethods()) {
+		for (MethodWrapper method : c.getAllMethods()) {
 			addMethod(method);
 		}
-		for (TypeWrapper innerClass : c.getDeclaredClasses()) {
+		for (TypeWrapper innerClass : c.getAllClasses()) {
 			addType(innerClass);
 		}
 	}

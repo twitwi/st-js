@@ -289,7 +289,7 @@ public class ClassWrapper implements TypeWrapper {
 	}
 
 	public List<MethodWrapper> findMethods(final String name) {
-		return ImmutableList.copyOf(Iterables.filter(getDeclaredMethods(), new Predicate<MethodWrapper>() {
+		return ImmutableList.copyOf(Iterables.filter(getAllMethods(), new Predicate<MethodWrapper>() {
 			@Override
 			public boolean apply(MethodWrapper method) {
 				return method.getName().equals(name);
@@ -325,7 +325,29 @@ public class ClassWrapper implements TypeWrapper {
 		return Option.none();
 	}
 
-	public List<MethodWrapper> getDeclaredMethods() {
+	public List<MethodWrapper> getDeclaredMethods(){
+		prepareFieldsMethodsAndTypes();
+		List<MethodWrapper> methods = new ArrayList<MethodWrapper>();
+		for(MethodWrapper m : this.getAllMethods()){
+			if(m.getMethod().getDeclaringClass().equals(this.clazz)){
+				methods.add(m);
+			}
+		}
+		return methods;
+	}
+	
+	public List<FieldWrapper> getDeclaredFields(){
+		prepareFieldsMethodsAndTypes();
+		List<FieldWrapper> fields = new ArrayList<FieldWrapper>();
+		for(FieldWrapper f : this.getAllFields()){
+			if(f.isDeclared()){
+				fields.add(f);
+			}
+		}
+		return fields;
+	}
+	
+	public List<MethodWrapper> getAllMethods() {
 		prepareFieldsMethodsAndTypes();
 		return Lists.newArrayList(methods.values());
 	}
@@ -347,8 +369,8 @@ public class ClassWrapper implements TypeWrapper {
 		return clazz;
 	}
 
-	public List<FieldWrapper> getDeclaredNonPrivateStaticFields() {
-		return ImmutableList.copyOf(filter(getDeclaredFields(), new Predicate<FieldWrapper>() {
+	public List<FieldWrapper> getAllNonPrivateStaticFields() {
+		return ImmutableList.copyOf(filter(getAllFields(), new Predicate<FieldWrapper>() {
 			@Override
 			public boolean apply(FieldWrapper field) {
 				return isStaticButNotPrivate(field.getModifiers());
@@ -360,8 +382,8 @@ public class ClassWrapper implements TypeWrapper {
 		return (modifiers & (PRIVATE | STATIC)) == STATIC;
 	}
 
-	public List<MethodWrapper> getDeclaredNonPrivateStaticMethods() {
-		return ImmutableList.copyOf(filter(getDeclaredMethods(), new Predicate<MethodWrapper>() {
+	public List<MethodWrapper> getAllNonPrivateStaticMethods() {
+		return ImmutableList.copyOf(filter(getAllMethods(), new Predicate<MethodWrapper>() {
 
 			@Override
 			public boolean apply(MethodWrapper method) {
@@ -387,12 +409,12 @@ public class ClassWrapper implements TypeWrapper {
 		}), WrapClass));
 	}
 
-	public List<TypeWrapper> getDeclaredClasses() {
+	public List<TypeWrapper> getAllClasses() {
 		prepareFieldsMethodsAndTypes();
 		return Lists.newArrayList(types.values());
 	}
 
-	public List<FieldWrapper> getDeclaredFields() {
+	public List<FieldWrapper> getAllFields() {
 		prepareFieldsMethodsAndTypes();
 		return Lists.newArrayList(fields.values());
 	}

@@ -143,4 +143,8 @@ public class MethodWrapper {
 	public void setMinifiedName(String minifiedName) {
 		this.minifiedName = minifiedName;
 	}
+	
+	public Method getMethod(){
+		return this.method;
+	}
 }

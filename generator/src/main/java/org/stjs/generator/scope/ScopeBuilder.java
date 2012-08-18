@@ -156,10 +156,10 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 					if (importDecl.isStatic()) {
 						QualifiedNameExpr expr = (QualifiedNameExpr) name;
 						for (ClassWrapper clazz : identifyQualifiedNameExprClass(expr)) {
-							for (FieldWrapper field : clazz.getDeclaredNonPrivateStaticFields()) {
+							for (FieldWrapper field : clazz.getAllNonPrivateStaticFields()) {
 								scope.addField(field);
 							}
-							for (MethodWrapper method : clazz.getDeclaredNonPrivateStaticMethods()) {
+							for (MethodWrapper method : clazz.getAllNonPrivateStaticMethods()) {
 								scope.addMethod(method);
 							}
 							for (ClassWrapper type : clazz.getDeclaredNonPrivateStaticClasses()) {
