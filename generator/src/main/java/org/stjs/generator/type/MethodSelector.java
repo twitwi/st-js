@@ -61,7 +61,7 @@ public class MethodSelector {
 		if (matching.size() == 0) {
 			return null;
 		}
-
+		
 		MethodWrapper found;
 		if (matching.size() == 1) {
 			found = matching.get(0);

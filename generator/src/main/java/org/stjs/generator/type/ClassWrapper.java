@@ -329,7 +329,7 @@ public class ClassWrapper implements TypeWrapper {
 		prepareFieldsMethodsAndTypes();
 		List<MethodWrapper> methods = new ArrayList<MethodWrapper>();
 		for(MethodWrapper m : this.getAllMethods()){
-			if(m.getMethod().getDeclaringClass().equals(this.clazz)){
+			if(m.isDeclared()){
 				methods.add(m);
 			}
 		}

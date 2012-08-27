@@ -65,7 +65,7 @@ public class ConstrainedNameAllocator {
 				String newName;
 				do{
 					newName = iterator.nextName();
-				}while(own.containsKey(newName) || inherited.containsKey(newName));
+				}while(own.containsValue(newName) || inherited.containsValue(newName));
 				return newName;
 			}
 		});

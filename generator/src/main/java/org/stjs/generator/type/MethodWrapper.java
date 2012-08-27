@@ -129,7 +129,9 @@ public class MethodWrapper {
 	}
 
 	public MethodWrapper withReturnType(TypeWrapper newReturnType) {
-		return new MethodWrapper(method, newReturnType, parameterTypes, modifiers, typeParameters, ownerType, declared);
+		MethodWrapper wrapper = new MethodWrapper(method, newReturnType, parameterTypes, modifiers, typeParameters, ownerType, declared);
+		wrapper.setMinifiedName(this.getMinifiedName());
+		return wrapper;
 	}
 
 	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
@@ -142,9 +144,5 @@ public class MethodWrapper {
 
 	public void setMinifiedName(String minifiedName) {
 		this.minifiedName = minifiedName;
-	}
-	
-	public Method getMethod(){
-		return this.method;
 	}
 }

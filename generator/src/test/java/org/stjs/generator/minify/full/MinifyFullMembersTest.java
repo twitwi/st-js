@@ -7,6 +7,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.stjs.generator.minify.Animal;
+import org.stjs.generator.minify.Boat;
+import org.stjs.generator.minify.Dog;
+import org.stjs.generator.minify.Honker;
 import org.stjs.generator.minify.MemberNameMinifier;
 import org.stjs.generator.minify.MinifyLevel;
 import org.stjs.generator.minify.TypeForest;
@@ -29,15 +32,36 @@ public class MinifyFullMembersTest {
 	
 	@Test
 	public void testSingleClass(){
-		// given
-		TypeGraph graph = buildGraph(Animal.class);
-		MemberNameMinifier minifier = new MemberNameMinifier(graph, MinifyLevel.FULL);
-		
 		// when
-		minifier.allocate();
+		allocate(Animal.class);
 		
 		// then
 		assertMinifiedMethodName("a", Animal.class, "breathe");
+	}
+	
+	@Test
+	public void testSingleInterface(){
+		// when
+		allocate(Honker.class);
+		
+		// then
+		assertMinifiedMethodName("a", Honker.class, "honk");
+	}
+	
+	@Test
+	public void testSingleInheritance(){
+		// when
+		allocate(Dog.class);
+		
+		// then
+		assertMinifiedMethodName("a", Dog.class, "breathe");
+		assertMinifiedMethodName("b", Dog.class, "bark");
+	}
+	
+	private static void allocate(Class<?> classes){
+		TypeGraph graph = buildGraph(classes);
+		MemberNameMinifier minifier = new MemberNameMinifier(graph, MinifyLevel.FULL);
+		minifier.allocate();
 	}
 	
 	private static TypeGraph buildGraph(Class<?>... classes){
