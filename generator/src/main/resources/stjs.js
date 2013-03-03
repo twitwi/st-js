@@ -20,8 +20,19 @@
 var NOT_IMPLEMENTED = function(){
 	throw "This method is not implemented in Javascript.";
 }
-/* String */
 
+JavalikeEquals = function(value){
+	if (value == null)
+		return false;
+	if (value.valueOf)
+		return this.valueOf() === value.valueOf();
+	return this === value;
+}
+
+/* String */
+if (!String.prototype.equals) {
+	String.prototype.equals=JavalikeEquals;
+}
 if (!String.prototype.getBytes) {
 	String.prototype.getBytes=NOT_IMPLEMENTED;
 }
@@ -126,6 +137,8 @@ if (!String.prototype.regionMatches){
 	}
 }
 
+
+
 //force valueof to match the Java's behavior
 String.valueOf=function(value){
 	return new String(value);
@@ -201,6 +214,9 @@ if (!Number.isNaN) {
 if (!Number.prototype.isNaN) {
 	Number.prototype.isNaN = isNaN;
 }
+if (!Number.prototype.equals) {
+	Number.prototype.equals=JavalikeEquals;
+}
 
 //force valueof to match approximately the Java's behavior (for Integer.valueOf it returns in fact a double)
 Number.valueOf=function(value){
@@ -208,17 +224,22 @@ Number.valueOf=function(value){
 }
 
 /* Boolean */
+if (!Boolean.prototype.equals) {
+	Boolean.prototype.equals=JavalikeEquals;
+}
+
 //force valueof to match the Java's behavior
 Boolean.valueOf=function(value){
 	return new Boolean(value).valueOf();
 }
 
 
+
 /************* STJS helper functions ***************/
 var stjs={};
 
 stjs.global=this;
-stjs.skipCopy = {"prototype":true, "constructor": true, "$typeDescription":true};
+stjs.skipCopy = {"prototype":true, "constructor": true, "$typeDescription":true, "$inherit" : true};
 
 stjs.ns=function(path){
 	var p = path.split(".");
@@ -238,7 +259,63 @@ stjs.copyProps=function(from, to){
 	return to;
 };
 
-stjs.extend=function( _constructor,  _super, _implements){
+stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescription){
+	if(typeof(_typeDescription) !== "object"){
+		// stjs 1.3+ always passes an non-null object to _typeDescription => The code calling stjs.extend
+		// was generated with version 1.2 or earlier, so let's call the 1.2 version of stjs.extend
+		return stjs.extend12.apply(this, arguments);
+	}
+
+	_constructor.$inherit=[];
+	var key, a;
+	if(_super != null){
+		// I is used as a no-op constructor that has the same prototype as _super
+		// we do this because we cannot predict the result of calling new _super()
+		// without parameters (it might throw an exception).
+		// Basically, the following 3 lines are a safe equivalent for
+		// _constructor.prototype = new _super();
+		var I = function(){};
+		I.prototype	= _super.prototype;
+		_constructor.prototype	= new I();
+
+		// copy static properties for super
+		// assign every method from proto instance
+		stjs.copyProps(_super, _constructor);
+		stjs.copyProps(_super.$typeDescription, _typeDescription);
+
+		//add the super class to inherit array
+		_constructor.$inherit.push(_super);
+	}
+
+	// copy static properties for interfaces
+	for(a = 0; a < _implements.length; ++a){
+		stjs.copyProps(_implements[a], _constructor);
+		_constructor.$inherit.push(_implements[a]);
+	}
+
+	// remember the correct constructor
+	_constructor.prototype.constructor	= _constructor;
+
+	// run the initializer to assign all static and instance variables/functions
+	if(_initializer != null){
+		_initializer(_constructor, _constructor.prototype);
+	}
+
+	_constructor.$typeDescription = _typeDescription;
+
+	// add the default equals method if it is not present yet, and we don't have a superclass
+	if(_super == null && !_constructor.prototype.equals){
+		_constructor.prototype.equals = JavalikeEquals;
+	}
+
+	// build package and assign
+	return	_constructor;
+};
+
+/**
+ * 1.2 and earlier version of stjs.extend. Included for backwards compatibility
+ */
+stjs.extend12=function( _constructor,  _super, _implements){
 	var key, a;
 	var I = function(){};
 	I.prototype	= _super.prototype;
@@ -252,10 +329,33 @@ stjs.extend=function( _constructor,  _super, _implements){
 	// remember the correct constructor
 	_constructor.prototype.constructor	= _constructor;
 
+	// add the default equals method if we don't have a superclass. Code generated with version 1.2 will
+	// override this method is equals() is present in the original java code.
+	// this was not part of the original 1.2 version of extends, however forward compatibility
+	// with 1.3 requires it
+	if(_super == null){
+		_constructor.prototype.equals = JavalikeEquals;
+	}
+
 	// build package and assign
 	return	_constructor;
 };
 
+/**
+ * checks if the child is an instanceof parent. it checks recursively if "parent" is the child itself or it's found somewhere in the $inherit array
+ */
+stjs.isInstanceOf=function(child, parent){
+	if (child === parent)
+		return true;
+	if (!child.$inherit)
+		return false;
+	for(var i in child.$inherit){
+		if (stjs.isInstanceOf(child.$inherit[i], parent)) {
+			return true;
+		}
+	}
+	return false;
+}
 stjs.enumEntry=function(idx, name){
 	this._name = name;
 	this._ordinal = idx;
@@ -270,6 +370,7 @@ stjs.enumEntry.prototype.ordinal=function(){
 stjs.enumEntry.prototype.toString=function(){
 	return this._name;
 };
+stjs.enumEntry.prototype.equals=JavalikeEquals;
 
 stjs.enumeration=function(){
 	var i;
@@ -300,6 +401,12 @@ stjs.isEnum=function(obj){
 	return obj != null && obj.constructor == stjs.enumEntry;
 }
 
+stjs.trunc=function(n) {
+	if (n == null)
+		return null;
+	return n | 0;
+}
+
 stjs.converters = {
 	Date : function(s, type) {
 		var a = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)$/
@@ -315,6 +422,7 @@ stjs.converters = {
 		return eval(type.arguments[0])[s];
 	}
 };
+
 /** *********** global ************** */
 function exception(err){
 	return err;
@@ -551,3 +659,56 @@ function assertStateTrue(position, code, condition) {
 	if (!condition && stjsAssertHandler)
 		stjsAssertHandler(position, code, "Wrong state. Condition is false");
 }
+/** exception **/
+var Throwable = function(message, cause){
+	if (typeof message === "string"){
+		this.detailMessage  = message;
+		this.message = message;
+		this.cause = cause;
+	} else {
+		this.cause = message;
+	}
+};
+stjs.extend(Throwable, Error, [], function(constructor, prototype){
+	prototype.detailMessage = null;
+	prototype.cause = null;
+	prototype.getMessage = function() {
+        return this.detailMessage;
+    };
+
+	prototype.getLocalizedMessage = function() {
+        return this.getMessage();
+    };
+
+	prototype.getCause = function() {
+        return (this.cause==this ? null : this.cause);
+    };
+
+	prototype.toString = function() {
+	        var s = "Exception";//TODO should get the exception's type name here
+	        var message = this.getLocalizedMessage();
+	        return (message != null) ? (s + ": " + message) : s;
+	 };
+
+	 //TODO use stacktrace.js script
+	 prototype.getStackTrace = function() {
+		 return this.stack;
+	 };
+
+	 //TODO use stacktrace.js script
+	 prototype.printStackTrace = function(){
+		 console.error(this.getStackTrace());
+	 };
+}, {});
+
+var Exception = function(message, cause){
+	Throwable.call(this, message, cause);
+};
+stjs.extend(Exception, Throwable, [], function(constructor, prototype){
+}, {});
+
+var RuntimeException = function(message, cause){
+	Exception.call(this, message, cause);
+};
+stjs.extend(RuntimeException, Exception, [], function(constructor, prototype){
+}, {});

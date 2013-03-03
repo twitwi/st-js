@@ -1,7 +1,6 @@
 package org.stjs.generator.writer.inheritance;
 
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
 
 import org.junit.Test;
 
@@ -9,12 +8,12 @@ public class InheritanceGeneratorTest {
 
 	@Test
 	public void testImplements() {
-		assertCodeContains(Inheritance1.class, "stjs.extend(Inheritance1, MyInterface);");
+		assertCodeContains(Inheritance1.class, "stjs.extend(Inheritance1, null, [MyInterface],");
 	}
 
 	@Test
 	public void testExtends() {
-		assertCodeContains(Inheritance2.class, "stjs.extend(Inheritance2, MySuperClass);");
+		assertCodeContains(Inheritance2.class, "stjs.extend(Inheritance2, MySuperClass, [],");
 	}
 
 	@Test
@@ -25,16 +24,22 @@ public class InheritanceGeneratorTest {
 
 	@Test
 	public void testExtendsMore() {
-		assertCodeContains(Inheritance4.class, "stjs.extend(Inheritance4, MyInterface, MyInterface2);");
+		assertCodeContains(Inheritance4.class, "stjs.extend(Inheritance4, null, [MyInterface, MyInterface2],");
 	}
 
 	@Test
 	public void testAbstractAndGeneric() {
-		assertCodeContains(Inheritance5.class, "stjs.extend(Inheritance5, MyInterface3);");
+		assertCodeContains(Inheritance5.class, "stjs.extend(Inheritance5, null, [MyInterface3],");
 	}
 
 	@Test
 	public void testImplementsSyntheticType() {
-		assertCodeDoesNotContain(Inheritance6.class, "stjs.extend");
+		assertCodeContains(Inheritance6.class, "stjs.extend(Inheritance6, null, [], null, {});");
+	}
+
+	@Test
+	public void testExtendsEmptyContructor() {
+		// check that the super constructor is called for empty constructor in the child class
+		assertCodeContains(Inheritance7.class, "MySuperClass.call(this);");
 	}
 }

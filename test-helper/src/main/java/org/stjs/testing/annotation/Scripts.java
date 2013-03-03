@@ -22,11 +22,15 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Deprecated
 /**
- * this annotation describes the scripts to be added to the page during the unit test. The scripts can be a file relative to the projects home,
- * searched in the classpath (classpath:/script.js) or as an url
+ * this annotation describes the scripts to be added to the page during the unit test before the script from the inclusion of any script generated from Java dependencies.
+ * The scripts can be a file relative to the projects home, searched in the classpath (classpath:/script.js) or as an url.
+ * This annotation is kept for backward compatibility. Please note that if you use this annotation, the scripts from bridges ARE NOT automatically added, because they may clash with scripts you may have added manually!
  *
  * @author acraciun
+ * @see ScriptsBefore
+ * @see ScriptsAfter
  *
  */
 public @interface Scripts {

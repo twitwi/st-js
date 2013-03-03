@@ -236,6 +236,7 @@ public class ClassWrapper implements TypeWrapper {
 
 	}
 
+	@Override
 	public Type getType() {
 		return clazz;
 	}
@@ -244,8 +245,17 @@ public class ClassWrapper implements TypeWrapper {
 		return clazz.getPackage().getName();
 	}
 
+	@Override
 	public String getSimpleName() {
 		return clazz.getSimpleName();
+	}
+	
+	/**
+	 * Returns the binary name of the wrapped classed (as defined in JLS §13.1) excluding the package name.
+	 */
+	public String getSimpleBinaryName(){
+		String packageName = clazz.getPackage().getName();
+		return clazz.getName().substring(packageName.length() + 1);
 	}
 
 	@Override
@@ -254,7 +264,7 @@ public class ClassWrapper implements TypeWrapper {
 		if (name.isEmpty()) {
 			return GeneratorConstants.SPECIAL_INLINE_TYPE;
 		}
-		for (Class<?> c = clazz.getDeclaringClass(); c != null; c = c.getDeclaringClass()) {
+		for (Class<?> c = clazz.getDeclaringClass(); c != null && !c.isAnonymousClass(); c = c.getDeclaringClass()) {
 			name = c.getSimpleName() + "." + name;
 		}
 		return name;
@@ -436,6 +446,20 @@ public class ClassWrapper implements TypeWrapper {
 
 	public boolean isInnerType() {
 		return clazz.getDeclaringClass() != null;
+	}
+	
+	public boolean isAnonymousClass(){
+		return clazz.isAnonymousClass();
+	}
+	
+	public boolean hasAnonymousDeclaringClass(){
+		if(clazz.getDeclaringClass() == null){
+			return false;
+		}
+		if(clazz.getDeclaringClass().isAnonymousClass()){
+			return true;
+		}
+		return this.getDeclaringClass().getOrNull().hasAnonymousDeclaringClass();
 	}
 
 	@Override

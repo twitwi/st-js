@@ -198,22 +198,6 @@ public class SpecialMethodHandlers {
 			}
 		});
 
-		// equals -> ==
-		methodHandlers.put("equals", new SpecialMethodHandler() {
-			@Override
-			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
-				if ((n.getArgs() == null) || (n.getArgs().size() != 1)) {
-					return false;
-				}
-				currentHandler.printer.print("(");
-				printScope(currentHandler, n, context, false);
-				currentHandler.printer.print(" == ");
-				n.getArgs().get(0).accept(currentHandler, context);
-				currentHandler.printer.print(")");
-				return true;
-			}
-		});
-
 		// $properties(obj) -> obj
 		methodHandlers.put("$properties", new SpecialMethodHandler() {
 			@Override
@@ -242,6 +226,17 @@ public class SpecialMethodHandlers {
 				}
 				StringLiteralExpr code = (StringLiteralExpr) n.getArgs().get(0);
 				currentHandler.printer.print(code.getValue());
+				return true;
+			}
+		});
+
+		methodHandlers.put("org.stjs.javascript.Global.typeof", new SpecialMethodHandler() {
+			@Override
+			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
+				// add parentheses around
+				currentHandler.printer.print("(typeof ");
+				n.getArgs().get(0).accept(currentHandler, context);
+				currentHandler.printer.print(")");
 				return true;
 			}
 		});

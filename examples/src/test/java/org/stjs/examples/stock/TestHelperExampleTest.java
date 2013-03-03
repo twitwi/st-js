@@ -23,4 +23,23 @@ public class TestHelperExampleTest {
 		assertEquals("xFoo", pojo.y);
 	}
 
+	@SuppressWarnings("deprecation")
+	@Test
+	public void doubleTest() {
+		assertEquals(1.0, 1.0);
+		assertEquals("should be equals", 1.0, 1.0);
+		assertEquals(1.0, 1.0, 0.01);
+		assertEquals("shoud be equals", 1.0, 1.0, 0.01);
+	}
+
+	@Test(expected = RuntimeException.class)
+	public void exceptionTest() {
+		throw new RuntimeException("abc");
+	}
+
+	@Test(expected = Exception.class)
+	public void exceptionTestParent() {
+		throw new RuntimeException("abc");
+	}
+
 }

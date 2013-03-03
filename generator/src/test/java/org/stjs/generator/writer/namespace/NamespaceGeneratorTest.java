@@ -13,17 +13,23 @@ public class NamespaceGeneratorTest {
 		assertCodeContains(Namespace1.class, "stjs.ns(\"a.b\");");
 		assertCodeDoesNotContain(Namespace1.class, "var a.b");
 		assertCodeContains(Namespace1.class, "a.b.Namespace1=function()");
-		assertCodeContains(Namespace1.class, "a.b.Namespace1.prototype.instanceMethod=");
-		assertCodeContains(Namespace1.class, "a.b.Namespace1.prototype.instanceField=");
-		assertCodeContains(Namespace1.class, "a.b.Namespace1.staticMethod=");
-		assertCodeContains(Namespace1.class, "a.b.Namespace1.staticField=");
+		assertCodeContains(Namespace1.class, "prototype.instanceMethod=function()");
+		assertCodeContains(Namespace1.class, "prototype.instanceField=null");
+		assertCodeContains(Namespace1.class, "constructor.staticMethod=function()");
+		assertCodeContains(Namespace1.class, "constructor.staticField=null");
 	}
 
 	@Test
 	public void testExtends() {
-		assertCodeContains(Namespace2.class, "stjs.extend(a.b.Namespace2.Child, a.b.Namespace2)");
+		assertCodeContains(Namespace2.class, "stjs.extend(a.b.Namespace2.Child, a.b.Namespace2, [],");
 		// call super
 		assertCodeContains(Namespace2.class, "a.b.Namespace2.call(this)");
+	}
+
+	@Test
+	public void testExtends2() {
+		assertCodeContains(Namespace2a.class, "stjs.extend(a.b.Namespace2a, a.b.Namespace1, [],");
+		assertCodeDoesNotContain(Namespace2a.class, "var a.b");
 	}
 
 	@Test
@@ -53,7 +59,11 @@ public class NamespaceGeneratorTest {
 
 	@Test
 	public void testInlineConstruct() {
-		assertCodeContains(Namespace8.class, "stjs.extend(_InlineType, a.b.Namespace8)");
+		assertCodeContains(Namespace8.class, "stjs.extend(function Namespace8$1(){a.b.Namespace8.apply(this, arguments);}, a.b.Namespace8, [], ");
 	}
 
+	@Test(expected = JavascriptGenerationException.class)
+	public void testReservedWordsInNamespace() {
+		generate(Namespace9.class);
+	}
 }

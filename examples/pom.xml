@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.st-js</groupId>
 		<artifactId>stjs</artifactId>
-		<version>1.2.4-SNAPSHOT</version>
+		<version>1.3.2-SNAPSHOT</version>
 	</parent>
 
 
@@ -25,6 +25,13 @@
 		<dependency>
 			<groupId>org.st-js</groupId>
 			<artifactId>jquery</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.st-js</groupId>
+			<artifactId>example-lib</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
@@ -54,21 +61,16 @@
 				<version>${project.version}</version>
 				<executions>
 					<execution>
-						<id>main</id>
 						<goals>
 							<goal>generate</goal>
-						</goals>
-						<configuration>
-							<generateSourceMap>true</generateSourceMap>
-						</configuration>
-					</execution>
-					<execution>
-						<id>test</id>
-						<goals>
 							<goal>generate-test</goal>
+							<goal>copy-js</goal>
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<generateSourceMap>true</generateSourceMap>
+				</configuration>
 			</plugin>
 
 			<!-- jetty -->

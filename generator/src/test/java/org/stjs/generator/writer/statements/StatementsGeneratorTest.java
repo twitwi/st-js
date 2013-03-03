@@ -1,7 +1,9 @@
 package org.stjs.generator.writer.statements;
 
+import static org.junit.Assert.assertEquals;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
+import static org.stjs.generator.utils.GeneratorTestHelper.execute;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Ignore;
@@ -61,7 +63,7 @@ public class StatementsGeneratorTest {
 
 	@Test
 	public void testInstanceof() {
-		assertCodeContains(Statements10.class, "arg.constructor == Statements10");
+		assertCodeContains(Statements10.class, "stjs.isInstanceOf(arg.constructor, Statements10)");
 	}
 
 	@Test
@@ -90,5 +92,12 @@ public class StatementsGeneratorTest {
 	@Test(expected = JavascriptGenerationException.class)
 	public void testInstanceInitializer() {
 		generate(Statements15.class);
+	}
+
+	@Test
+	public void testStaticInitializerContainment() {
+		// We must do the weird (Number).intValue() because for some reason the execution returns the
+		// integer 2 when run from eclipse, but return the double 2.0 when run from maven...
+		assertEquals(2, ((Number) execute(Statements16.class)).intValue());
 	}
 }

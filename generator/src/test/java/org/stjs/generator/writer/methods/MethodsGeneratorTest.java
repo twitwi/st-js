@@ -9,23 +9,31 @@ import org.stjs.generator.JavascriptGenerationException;
 public class MethodsGeneratorTest {
 	@Test
 	public void testPublicInstanceMethod() {
-		assertCodeContains(Methods1.class, "Methods1.prototype.method = function(arg1,arg2){return 0;};");
+		assertCodeContains(Methods1.class, //
+				"stjs.extend(Methods1, null, [], function(constructor, prototype){" + //
+				"prototype.method = function(arg1,arg2){return 0;}");
 	}
 
 	@Test
 	public void testPrivateInstanceMethod() {
 		// same as public
-		assertCodeContains(Methods2.class, "Methods2.prototype.method = function(arg1,arg2){");
+		assertCodeContains(Methods2.class, //
+				"stjs.extend(Methods2, null, [], function(constructor, prototype){" + //
+				"prototype.method = function(arg1,arg2){");
 	}
 
 	@Test
 	public void testPublicStaticMethod() {
-		assertCodeContains(Methods3.class, "Methods3.method = function(arg1,arg2){");
+		assertCodeContains(Methods3.class, // 
+				"stjs.extend(Methods3, null, [], function(constructor, prototype){" + //
+				"constructor.method = function(arg1,arg2){");
 	}
 
 	@Test
 	public void testPrivateStaticMethod() {
-		assertCodeContains(Methods4.class, "Methods4.method = function(arg1,arg2){");
+		assertCodeContains(Methods4.class, //
+				"stjs.extend(Methods4, null, [], function(constructor, prototype){" + //
+				"constructor.method = function(arg1,arg2){");
 	}
 
 	@Test
@@ -42,7 +50,7 @@ public class MethodsGeneratorTest {
 	@Test
 	public void testSpecialThis() {
 		// the special parameter THIS should not be added
-		assertCodeContains(Methods7.class, "Methods7.prototype.method=function(arg2){");
+		assertCodeContains(Methods7.class, "prototype.method=function(arg2){");
 	}
 
 	@Test
@@ -70,7 +78,7 @@ public class MethodsGeneratorTest {
 	@Test
 	public void testVarArgsMethod3() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
-		assertCodeContains(Methods11.class, "Methods11.prototype.method=function(_arguments){}");
+		assertCodeContains(Methods11.class, "prototype.method=function(_arguments){}");
 	}
 
 	@Test
@@ -81,5 +89,11 @@ public class MethodsGeneratorTest {
 	@Test
 	public void testWildcardResolution() {
 		assertCodeContains(Methods13.class, "m.parent().parent()");
+	}
+
+	@Test
+	public void testAbstractMethod() {
+		// the class only contains abstract methods, therefore nothing must be generated
+		assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], null, {});");
 	}
 }
