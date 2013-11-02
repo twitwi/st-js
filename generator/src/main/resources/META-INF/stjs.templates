@@ -13,4 +13,5 @@ properties=org.stjs.generator.writer.template.PropertiesTemplate
 put=org.stjs.generator.writer.template.PutTemplate
 set=org.stjs.generator.writer.template.SetTemplate
 typeOf=org.stjs.generator.writer.template.TypeOfTemplate
+dollardot=org.stjs.generator.writer.template.DollarDotTemplate
 
