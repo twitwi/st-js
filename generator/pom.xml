@@ -17,7 +17,28 @@
             <stjsproject.version>2.0.0</stjsproject.version>
 	</properties>
 
-
+        <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        </build>
 
 	<dependencies>
 		<dependency>
