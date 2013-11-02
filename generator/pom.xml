@@ -5,6 +5,7 @@
 	<artifactId>generator</artifactId>
 	<packaging>jar</packaging>
 	<name>Strongly-typed Javascript:Generator</name>
+	<version>2.0.0.0.777.1</version>
 
 	<parent>
 		<groupId>org.st-js</groupId>
@@ -13,8 +14,8 @@
 	</parent>
 
 	<properties>
+            <stjsproject.version>2.0.0</stjsproject.version>
 	</properties>
-
 
 
 
@@ -22,7 +23,7 @@
 		<dependency>
 			<groupId>org.st-js</groupId>
 			<artifactId>shared</artifactId>
-			<version>${project.version}</version>
+			<version>${stjsproject.version}</version>
 		</dependency>
 
 
@@ -70,7 +71,7 @@
 		<dependency>
 			<groupId>org.st-js</groupId>
 			<artifactId>server</artifactId>
-			<version>${project.version}</version>
+			<version>${stjsproject.version}</version>
 			<scope>test</scope>
 		</dependency>
 		

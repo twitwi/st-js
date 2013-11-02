@@ -136,7 +136,7 @@
 							<dependency>
 								<groupId>org.st-js</groupId>
 								<artifactId>code-analysis</artifactId>
-								<version>${project.version}</version>
+								<version>${stjsproject.version}</version>
 							</dependency>
 						</dependencies>
 					</plugin>
@@ -166,7 +166,7 @@
 							<dependency>
 								<groupId>org.st-js</groupId>
 								<artifactId>code-analysis</artifactId>
-								<version>${project.version}</version>
+								<version>${stjsproject.version}</version>
 							</dependency>
 
 							<dependency>
@@ -203,7 +203,7 @@
 							<dependency>
 								<groupId>org.st-js</groupId>
 								<artifactId>code-analysis</artifactId>
-								<version>${project.version}</version>
+								<version>${stjsproject.version}</version>
 							</dependency>
 						</dependencies>
 					</plugin>
